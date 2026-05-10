@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Экспресс-проверка готовности клиники к проверке РПН — Прототип v0.4 (60 вопросов)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--primary:#1a6b4e;--primary-dark:#0f4a35;--primary-light:#e6f4ee;
+--accent:#d4940a;--accent-light:rgba(212,148,10,0.08);
+--success:#198754;--success-light:#d1e7dd;
+--danger:#dc3545;--danger-light:#f8d7da;
+--warning:#e8b230;--warning-light:#fff3cd;
+--white:#fff;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+--gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;
+--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+--radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+--shadow-sm:0 1px 3px rgba(0,0,0,0.08);
+--shadow-md:0 4px 12px rgba(0,0,0,0.1);
+}
+body{font-family:var(--font);font-size:14px;line-height:1.55;color:var(--gray-800);background:#dde3ea;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page-wrap{max-width:980px;margin:24px auto;background:var(--white);box-shadow:var(--shadow-md);border-radius:var(--radius-lg);overflow:hidden}
+
+.hero{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,#22876a 100%);color:#fff;padding:32px 36px}
+.hero-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hero-logo{width:56px;height:56px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:26px;flex-shrink:0}
+.hero h1{font-size:1.5rem;font-weight:700;letter-spacing:-0.3px;line-height:1.25}
+.hero-sub{font-size:0.92rem;opacity:0.92;margin-top:6px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.hero-tag{font-size:0.74rem;padding:5px 12px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:30px}
+.hero-disclaimer{margin-top:14px;font-size:0.78rem;opacity:0.92;background:rgba(0,0,0,0.18);padding:10px 14px;border-radius:var(--radius-sm);border-left:3px solid var(--accent)}
+
+.lead-card{background:var(--gray-50);padding:22px 32px;border-bottom:1px solid var(--gray-200)}
+.lead-card h3{font-size:1rem;color:var(--primary-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lead-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.lead-grid input,.lead-grid select{padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:0.88rem;background:#fff}
+.lead-grid input:focus,.lead-grid select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,107,78,0.12)}
+.lead-grid input.invalid{border-color:var(--danger);background:#fff5f5}
+.lead-grid input.invalid:focus{box-shadow:0 0 0 3px rgba(220,53,69,0.15)}
+.field-error{font-size:0.74rem;color:var(--danger);margin-top:4px;display:none}
+.field-error.show{display:block}
+.lead-consent{margin-top:10px;font-size:0.78rem;color:var(--gray-600);display:flex;gap:8px;align-items:flex-start}
+.lead-consent input{margin-top:3px}
+.autosave-indicator{font-size:0.74rem;color:var(--gray-400);margin-top:8px;display:flex;align-items:center;gap:6px}
+.autosave-indicator.saved{color:var(--success)}
+.autosave-indicator i{font-size:0.7rem}
+
+.progress-wrap{padding:14px 32px;background:#fff;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--gray-200)}
+.progress-info{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--gray-600);margin-bottom:6px}
+.progress-info b{color:var(--primary)}
+.progress-bar{height:8px;background:var(--gray-200);border-radius:6px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 0.4s}
+
+.q-section{padding:22px 32px}
+.q-section h2{font-size:1.05rem;color:var(--primary-dark);margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.q-section h2 .badge-mode{margin-left:auto;font-size:0.68rem;padding:4px 10px;background:var(--accent);color:#fff;border-radius:20px;font-weight:600;white-space:nowrap}
+
+.qcard{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:16px 18px;margin-bottom:14px;transition:all 0.2s}
+.qcard:hover{box-shadow:var(--shadow-sm)}
+.qcard.answered{border-color:var(--success);background:#f6fdf9}
+.qcard.unanswered-critical{border-color:var(--danger);background:#fff7f7}
+.qcard-head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin-bottom:8px}
+.qcard-section{font-size:0.7rem;color:var(--gray-600);background:var(--gray-100);padding:3px 8px;border-radius:4px;font-weight:600}
+.qcard-tag{font-size:0.65rem;padding:3px 8px;border-radius:20px;font-weight:700}
+.qcard-tag.critical{background:var(--danger-light);color:var(--danger)}
+.qcard-tag.weight{background:#fef3c7;color:#92400e}
+.qcard-tag.future{background:#fce7f3;color:#be185d}
+.qcard-tag.demo{background:#dbeafe;color:#1e40af}
+.qcard-q{font-size:0.95rem;font-weight:600;line-height:1.45;margin-bottom:8px}
+.qcard-meta{font-size:0.78rem;color:var(--gray-600);margin:6px 0;padding:8px 10px;background:var(--gray-50);border-left:3px solid var(--primary);border-radius:4px;line-height:1.55}
+.qcard-meta b{color:var(--gray-800)}
+.qcard-meta .meta-row{display:block;margin-top:3px}
+.qcard-check{font-size:0.78rem;color:#92400e;margin:6px 0;padding:8px 10px;background:#fef3c7;border-left:3px solid var(--accent);border-radius:4px;line-height:1.5}
+.qcard-future{font-size:0.78rem;color:#7c2d92;margin:6px 0;padding:8px 10px;background:#fce7f3;border-left:3px solid #be185d;border-radius:4px;line-height:1.5}
+
+.qcard-answers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ans-btn{padding:8px 14px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);background:#fff;cursor:pointer;font-size:0.82rem;font-family:var(--font);transition:all 0.15s;font-weight:500}
+.ans-btn:hover{border-color:var(--primary);transform:translateY(-1px)}
+.ans-btn.active{color:#fff;border-color:transparent}
+.ans-btn.active[data-ans="yes"]{background:var(--success)}
+.ans-btn.active[data-ans="no"]{background:var(--danger)}
+.ans-btn.active[data-ans="partial"]{background:var(--warning);color:#5a4500}
+.ans-btn.active[data-ans="unknown"]{background:var(--gray-400)}
+.ans-btn.active[data-ans="na"]{background:var(--gray-600)}
+.qcard-rec{margin-top:10px;padding:10px 12px;background:var(--accent-light);border:1px dashed var(--accent);border-radius:var(--radius-sm);font-size:0.82rem;line-height:1.5;display:none}
+.qcard-rec.show{display:block}
+.qcard-rec b{color:var(--accent)}
+
+.actions{padding:18px 32px;background:var(--gray-50);display:flex;flex-wrap:wrap;gap:10px;justify-content:center;border-top:1px solid var(--gray-200)}
+.btn{padding:11px 22px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-size:0.9rem;font-weight:600;font-family:var(--font);cursor:pointer;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--gray-800);transition:all 0.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-ghost{background:transparent}
+
+.report{display:none;padding:24px 32px;background:#fff;border-top:3px solid var(--primary)}
+.report.show{display:block}
+.report h2{font-size:1.2rem;color:var(--primary-dark);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.rcard{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:14px;text-align:center}
+.rcard-val{font-size:1.6rem;font-weight:800;line-height:1.2;color:var(--primary)}
+.rcard-val.danger{color:var(--danger)}
+.rcard-lbl{font-size:0.72rem;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px}
+.rpn-banner{padding:16px 18px;border-radius:var(--radius-md);margin:14px 0;font-size:0.9rem;font-weight:600;line-height:1.5;border:2px solid}
+.rpn-green{background:#f0fdf4;color:#166534;border-color:#86efac}
+.rpn-yellow{background:#fefce8;color:#854d0e;border-color:#fde047}
+.rpn-red{background:#fff7ed;color:#9a3412;border-color:#fdba74}
+.rpn-critical{background:#fef2f2;color:#991b1b;border-color:#fca5a5}
+
+.charts-block{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+.chart-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:16px}
+.chart-card.full{grid-column:1 / -1}
+.chart-card h4{font-size:0.88rem;color:var(--primary-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.chart-canvas-wrap{position:relative;height:240px}
+.chart-canvas-wrap.tall{height:520px}
+@media (max-width:640px){ .charts-block{grid-template-columns:1fr} }
+
+.report-section{margin:18px 0}
+.report-section h3{font-size:0.95rem;color:var(--primary-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.report-list{list-style:none;padding:0}
+.report-list li{padding:10px 12px;background:var(--gray-50);border-left:3px solid var(--accent);border-radius:4px;margin-bottom:8px;font-size:0.86rem;line-height:1.5}
+.report-list li.critical{border-left-color:var(--danger);background:#fff7f7}
+
+.offer{display:none;margin:22px 0;background:linear-gradient(135deg,#0f4a35,#1a6b4e);border-radius:var(--radius-lg);padding:26px;color:#fff;position:relative;overflow:hidden}
+.offer.show{display:block}
+.offer::before{content:"";position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(212,148,10,0.15);border-radius:50%}
+.offer-badge{display:inline-block;background:var(--accent);color:#fff;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;margin-bottom:12px;position:relative;z-index:1}
+.offer h3{font-size:1.3rem;margin-bottom:8px;position:relative;z-index:1}
+.offer-sub{font-size:0.92rem;opacity:0.92;margin-bottom:16px;line-height:1.5;position:relative;z-index:1}
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:16px 0;position:relative;z-index:1}
+.offer-feat{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.85rem;line-height:1.45;display:flex;gap:10px;align-items:flex-start}
+.offer-feat i{color:var(--accent);font-size:1rem;margin-top:2px;flex-shrink:0}
+.offer-price{display:flex;align-items:baseline;gap:12px;margin:18px 0 14px;position:relative;z-index:1;flex-wrap:wrap}
+.offer-price-val{font-size:2rem;font-weight:800;color:var(--accent);line-height:1}
+.offer-price-lbl{font-size:0.8rem;opacity:0.88}
+.offer-cta{background:var(--accent);color:#fff;padding:14px 28px;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;width:100%;font-family:var(--font);transition:all 0.2s;position:relative;z-index:1}
+.offer-cta:hover{background:#b8800a;transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.offer-note{margin-top:12px;font-size:0.76rem;opacity:0.78;text-align:center;font-style:italic;position:relative;z-index:1}
+.offer-recommend{background:var(--accent);color:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;position:relative;z-index:1}
+
+.email-block{margin:22px 0;background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-md);padding:18px}
+.email-block h3{font-size:1rem;color:var(--primary-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.email-block p{font-size:0.86rem;color:var(--gray-600);margin-bottom:12px;line-height:1.5}
+.email-actions{display:flex;flex-wrap:wrap;gap:10px}
+
+.footer{padding:22px 32px;background:var(--gray-800);color:#9ca3af;font-size:0.78rem;text-align:center;line-height:1.6}
+.footer a{color:var(--accent);text-decoration:none}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--gray-800);color:#fff;padding:12px 18px;border-radius:var(--radius-sm);font-size:0.85rem;box-shadow:var(--shadow-md);transform:translateY(100px);opacity:0;transition:all 0.3s;z-index:1000;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--danger)}
+
+@media(max-width:640px){
+.page-wrap{margin:0;border-radius:0}
+.hero,.lead-card,.q-section,.actions,.report,.footer,.progress-wrap{padding-left:18px;padding-right:18px}
+.hero h1{font-size:1.2rem}
+.qcard-answers{flex-direction:column}
+.ans-btn{width:100%;text-align:center}
+}
+@media print{
+body{background:#fff}
+.page-wrap{box-shadow:none;margin:0;max-width:100%}
+.actions,.progress-wrap,.email-block,.offer-cta,.toast,.qcard-answers{display:none!important}
+.report{display:block!important;page-break-before:always}
+.qcard{break-inside:avoid;page-break-inside:avoid}
+.chart-card{break-inside:avoid;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrap" id="pdf-content">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-logo"><i class="fas fa-clipboard-check"></i></div>
+      <div>
+        <h1>Экспресс-проверка готовности клиники к проверке Роспотребнадзора</h1>
+        <div class="hero-sub">Полный санитарно-эпидемиологический аудит · 60 вопросов · 20–30 минут</div>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <span class="hero-tag"><i class="fas fa-gavel"></i> СанПиН 2.1.3678-21</span>
+      <span class="hero-tag"><i class="fas fa-virus-slash"></i> СанПиН 3.3686-21</span>
+      <span class="hero-tag"><i class="fas fa-radiation"></i> СанПиН 2.6.1.3288-25</span>
+      <span class="hero-tag"><i class="fas fa-calendar-alt"></i> Горизонт 2026 + анонс 2027</span>
+    </div>
+    <div class="hero-disclaimer">
+      <i class="fas fa-info-circle"></i> <b>Дисклеймер.</b> Тест предназначен для самопроверки санитарно-эпидемиологической готовности клиники. Он не заменяет официальную инспекцию и не является юридическим заключением. Требования <b>2026 года</b> отображаются как текущие действующие нормы, а ожидаемые изменения <b>2027 года</b> — как блок мониторинга и подготовки. Рекомендуем проверять актуальность норм перед принятием управленческих решений.
+    </div>
+  </header>
+
+  <section class="lead-card">
+    <h3><i class="fas fa-user-md"></i> Данные респондента</h3>
+    <div class="lead-grid">
+      <div>
+        <input type="text" id="lead-name" placeholder="ФИО *" required maxlength="120" autocomplete="name">
+        <div class="field-error" id="err-name">Введите корректное ФИО (мин. 2 слова)</div>
+      </div>
+      <select id="lead-role">
+        <option value="">Должность *</option>
+        <option value="owner">Собственник</option>
+        <option value="chief">Главный врач</option>
+        <option value="manager">Управляющий</option>
+        <option value="nurse">Старшая медсестра</option>
+        <option value="lawyer">Юрист клиники</option>
+        <option value="other">Другое</option>
+      </select>
+      <input type="text" id="lead-clinic" placeholder="Название клиники" maxlength="200">
+      <input type="text" id="lead-city" placeholder="Город" maxlength="80">
+      <div>
+        <input type="tel" id="lead-phone" placeholder="Телефон * (например, +7 999 123-45-67)" required autocomplete="tel" maxlength="20">
+        <div class="field-error" id="err-phone">Введите корректный телефон (10–15 цифр)</div>
+      </div>
+      <div>
+        <input type="email" id="lead-email" placeholder="E-mail *" required autocomplete="email" maxlength="120">
+        <div class="field-error" id="err-email">Введите корректный e-mail (не временный домен)</div>
+      </div>
+    </div>
+    <label class="lead-consent">
+      <input type="checkbox" id="lead-consent" checked>
+      <span>Согласен на обработку персональных данных и получение результатов теста на e-mail. <a href="#" style="color:var(--primary)">Политика конфиденциальности</a></span>
+    </label>
+    <input type="text" id="lead-website" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0;width:0" aria-hidden="true">
+    <div class="autosave-indicator" id="autosave-indicator">
+      <i class="fas fa-cloud"></i> <span>Автосохранение прогресса локально</span>
+    </div>
+  </section>
+
+  <div class="progress-wrap">
+    <div class="progress-info"><span>Прогресс прохождения</span><span><b id="prog-answered">0</b> из <b id="prog-total">0</b> · <b id="prog-pct">0%</b></span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+  </div>
+
+  <section class="q-section">
+    <h2><i class="fas fa-tasks"></i> Вопросы чек-листа <span class="badge-mode" id="mode-badge">Полный аудит — 60 вопросов</span></h2>
+    <div id="questions-container"></div>
+  </section>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="calculateResults()"><i class="fas fa-calculator"></i> Рассчитать результат</button>
+    <button class="btn btn-ghost" onclick="resetAll()"><i class="fas fa-redo"></i> Сбросить</button>
+    <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> Печать</button>
+  </div>
+
+  <section class="report" id="report">
+    <h2><i class="fas fa-chart-pie"></i> Итоговый отчёт</h2>
+    <div class="report-grid">
+      <div class="rcard"><div class="rcard-val" id="r-score">0%</div><div class="rcard-lbl">Готовность</div></div>
+      <div class="rcard"><div class="rcard-val danger" id="r-risk">0%</div><div class="rcard-lbl">Уровень риска</div></div>
+      <div class="rcard"><div class="rcard-val" id="r-yes">0</div><div class="rcard-lbl">Да</div></div>
+      <div class="rcard"><div class="rcard-val" id="r-no">0</div><div class="rcard-lbl">Нет</div></div>
+      <div class="rcard"><div class="rcard-val" id="r-partial">0</div><div class="rcard-lbl">Частично</div></div>
+      <div class="rcard"><div class="rcard-val" id="r-crit">0</div><div class="rcard-lbl">Крит. провалы</div></div>
+    </div>
+
+    <div class="rpn-banner" id="rpn-banner">—</div>
+
+    <div class="charts-block">
+      <div class="chart-card full">
+        <h4><i class="fas fa-chart-bar"></i> Готовность по секциям (%)</h4>
+        <div class="chart-canvas-wrap tall"><canvas id="chart-sections"></canvas></div>
+      </div>
+      <div class="chart-card full">
+        <h4><i class="fas fa-chart-pie"></i> Распределение ответов</h4>
+        <div class="chart-canvas-wrap"><canvas id="chart-answers"></canvas></div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h3><i class="fas fa-exclamation-triangle"></i> ТОП-проблем (приоритет к устранению)</h3>
+      <ul class="report-list" id="top-issues"><li>—</li></ul>
+    </div>
+
+    <div class="report-section">
+      <h3><i class="fas fa-clipboard-list"></i> Что сделать в ближайшие 7 дней</h3>
+      <ul class="report-list" id="plan-7"><li>—</li></ul>
+    </div>
+
+    <div class="report-section">
+      <h3><i class="fas fa-calendar-alt"></i> Что сделать в ближайшие 30 дней</h3>
+      <ul class="report-list" id="plan-30"><li>—</li></ul>
+    </div>
+
+    <div class="offer" id="offer">
+      <span class="offer-badge">⚡ СЛЕДУЮЩИЙ ЭТАП</span>
+      <div class="offer-recommend" id="offer-recommend"><i class="fas fa-user-md"></i> <span id="offer-recommend-text">Рекомендуем профессиональный аудит</span></div>
+      <h3>Профессиональный аудит клиники с выездом эксперта</h3>
+      <div class="offer-sub">
+        Самотест выявил риски — следующий шаг: полный экспертный аудит на месте с проверкой документов, журналов, помещений, персонала и подготовкой к проверке Роспотребнадзора.
+      </div>
+      <div class="offer-grid">
+        <div class="offer-feat"><i class="fas fa-check-circle"></i><div><b>Выезд эксперта</b> в клинику с проверкой по 120+ пунктам</div></div>
+        <div class="offer-feat"><i class="fas fa-file-alt"></i><div><b>Аудит всех журналов</b> и медицинской документации</div></div>
+        <div class="offer-feat"><i class="fas fa-search"></i><div><b>Имитация проверки РПН</b> с фиксацией нарушений</div></div>
+        <div class="offer-feat"><i class="fas fa-tools"></i><div><b>План устранения</b> с приоритетами и сроками</div></div>
+        <div class="offer-feat"><i class="fas fa-folder-open"></i><div><b>Шаблоны документов</b>: журналы, приказы, регламенты</div></div>
+        <div class="offer-feat"><i class="fas fa-headset"></i><div><b>30 дней консультаций</b> по итогам аудита</div></div>
+      </div>
+      <div class="offer-price">
+        <span class="offer-price-val">14 900 – 19 900 ₽</span>
+        <span class="offer-price-lbl">в зависимости от объёма</span>
+      </div>
+      <button class="offer-cta" onclick="goToOffer()"><i class="fas fa-arrow-right"></i> Заказать аудит клиники</button>
+      <div class="offer-note">Оплата через Tilda + ЮKassa · Менеджер свяжется в течение 1 рабочего дня для уточнения объёма</div>
+    </div>
+
+    <div class="email-block">
+      <h3><i class="fas fa-envelope"></i> Получить результаты на e-mail</h3>
+      <p>Отправим краткий отчёт с вашим Score, RPN-уровнем и приоритетным планом действий на указанный e-mail. Также можно скачать PDF.</p>
+      <div class="email-actions">
+        <button class="btn btn-primary" onclick="sendByEmail()"><i class="fas fa-paper-plane"></i> Отправить на e-mail</button>
+        <button class="btn btn-accent" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Скачать PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    Прототип v0.4 · Полный санитарно-эпидемиологический чек-лист РПН (60 вопросов)<br>
+    <a href="#">md-system.ru</a> · <a href="#">Политика конфиденциальности</a> · <a href="#">Контакты</a>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================================================================
+   ДАННЫЕ — 60 ВОПРОСОВ ПОЛНОГО САНИТАРНО-ЭПИДЕМИОЛОГИЧЕСКОГО АУДИТА
+==================================================================== */
+
+// Универсальные шаблоны рекомендаций (используются как fallback / общая логика)
+const REC_NO_TEMPLATE = "Разработайте регламент, утвердите приказом и назначьте ответственного. Систематизируйте документы и журналы, синхронизируйте с фактической работой клиники.";
+const REC_PARTIAL_TEMPLATE = "Закройте недостающие элементы регламента: документы, форматы, периодичность учёта, контроль исполнения и подтверждающие записи.";
+const REC_UNKNOWN_TEMPLATE = "В кабинете обратитесь к ответственному, проведите экспресс-аудит блока документации по внутреннему чек-листу. Если ситуация не ясна — включите этот блок в выезд эксперта на аудит.";
+
+const FUTURE_2027_DEFAULT = "Готовится переход к расширенному цифровому контролю и электронному учёту. По разделу ожидается актуализация требований мониторинга.";
+const FUTURE_2027_REFORM = "Контролируется как направление в концепции санитарной реформы — отслеживайте обновления нормативной базы. Не является текущим требованием для штрафов.";
+
+const questions = [
+  // ============ Общие сведения об организации ============
+  { id:"RPN-001", direction:"rpn", section:"Общие сведения об организации",
+    question:"Актуальны ли уставные документы клиники: регистрационные коды юр. лица, ОГРН, выписка из ЕГРЮЛ, договор аренды/собственности, штатное расписание и схема структуры?",
+    explanation:"Это базовая папка, которую запрашивают первой при любой проверке. Без актуальных документов невозможно подтвердить правовой статус организации.",
+    check:"Проверьте: устав, ОГРН, ИНН/КПП, ЕГРЮЛ, договор аренды или СОС, штатное расписание, приказ о назначении руководителя.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:2, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ГК РФ, ФЗ №129-ФЗ, СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Руководитель / Юрист клиники",
+    crmTag:["RPN_GENERAL_RISK"],
+    recommendationNo:"Соберите базовый комплект уставных документов в одну папку: устав, ЕГРЮЛ, штатное, приказ о руководителе, договор аренды. Назначьте ответственного хранителя.",
+    recommendationPartial:"Найдите недостающие документы: чаще всего нет актуального ЕГРЮЛ, договора аренды или штатного расписания на текущий год.",
+    recommendationUnknown:"Запросите у бухгалтера и юриста полный комплект уставных документов и проведите ревизию.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Уставные документы клиники"
+  },
+  { id:"RPN-002", direction:"rpn", section:"Общие сведения об организации",
+    question:"Есть ли актуальная схема помещений с указанием функционального назначения, путей движения, зон обработки, мест хранения МИ и зон утилизации медотходов?",
+    explanation:"Схема — обязательный документ для оценки соответствия санитарно-эпидемиологическому режиму. Используется инспектором как навигатор по клинике.",
+    check:"Проверьте: схему БТИ, экспликацию, зонирование, путь движения чистого/грязного, маркировку помещений.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.1.3678-21, СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Управляющий",
+    crmTag:["RPN_PREMISES_RISK"],
+    recommendationNo:"Закажите актуальную схему БТИ и составьте функциональное зонирование с маркировкой потоков «чистое/грязное».",
+    recommendationPartial:"Дополните схему отсутствующими блоками: пути движения, зоны хранения, зоны утилизации.",
+    recommendationUnknown:"Запросите у управляющего поэтажный план и сверьте с фактическим назначением кабинетов.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Схема помещений и зонирование"
+  },
+
+  // ============ Уведомительный режим и проверки ============
+  { id:"RPN-003", direction:"rpn", section:"Уведомительный режим и проверки",
+    question:"Подано ли уведомление в Роспотребнадзор о начале медицинской деятельности, есть ли отметка или входящий номер обращения?",
+    explanation:"Без уведомления деятельность считается несогласованной — это типовое основание для предписания.",
+    check:"Проверьте: копию уведомления, отметку РПН, входящий номер, дату подачи.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Постановление Правительства РФ № 584",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Руководитель / Юрист клиники",
+    crmTag:["RPN_NOTIFICATION_RISK"],
+    recommendationNo:"Подайте уведомление о начале медицинской деятельности и сохраните подтверждение получения РПН.",
+    recommendationPartial:"Проверьте, что уведомление подано на все осуществляемые виды деятельности.",
+    recommendationUnknown:"Запросите у юриста копию уведомления и реестровую запись на сайте РПН.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Уведомление о начале деятельности"
+  },
+  { id:"RPN-004", direction:"rpn", section:"Уведомительный режим и проверки",
+    question:"Имеются ли копии актов проверок, замечаний, предписаний и доказательства устранения с подтверждающими письмами?",
+    explanation:"При повторной проверке инспектор сверяет статус устранения. Отсутствие подтверждений = нарушение является «длящимся».",
+    check:"Проверьте: акты проверок за 3 года, предписания, отчёты об устранении, переписку с РПН.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №248-ФЗ «О государственном контроле»",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Руководитель / Юрист клиники",
+    crmTag:["RPN_CHECKS_PRESCRIPTIONS_RISK"],
+    recommendationNo:"Создайте архив проверок и предписаний за 3 года с отметками об устранении.",
+    recommendationPartial:"Дополните архив отсутствующими отчётами об устранении и переписку.",
+    recommendationUnknown:"Запросите у юриста реестр проверок и копии всех документов.",
+    product:"Premium-сопровождение проверок",
+    demo:false,
+    emailLabel:"Архив проверок и предписаний"
+  },
+
+  // ============ Производственный контроль ============
+  { id:"RPN-005", direction:"rpn", section:"Производственный контроль",
+    question:"Есть ли утверждённая программа производственного контроля (ППК) с графиком, по которому реально проводятся лабораторные пробы воздуха, поверхностей оборудования, рук персонала и стерильных материалов?",
+    explanation:"ППК — основной документ при проверке РПН. Без него штраф до 200 тыс. руб., деятельность может быть приостановлена.",
+    check:"Проверьте: утверждённую ППК, договор с аккредитованной лабораторией, протоколы за год, график выполнения.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СП 1.1.1058-01, СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Ответственный за санэпидрежим",
+    crmTag:["RPN_PPK_RISK"],
+    recommendationNo:"Срочно разработайте и утвердите ППК. Заключите договор с аккредитованной лабораторией и проведите первичные пробы.",
+    recommendationPartial:"Проверьте полноту графика — все обязательные точки контроля должны быть закрыты, протоколы подшиты.",
+    recommendationUnknown:"Запросите ППК у руководителя и протоколы за год для полного аудита.",
+    product:"Standard-пакет документации",
+    demo:true,
+    emailLabel:"Программа производственного контроля (ППК)"
+  },
+  { id:"RPN-006", direction:"rpn", section:"Производственный контроль",
+    question:"Сохраняются ли протоколы лабораторных, журналы и отчёты исполнения по производственному контролю в полном, читаемом и системном порядке?",
+    explanation:"Отсутствие протоколов или их хаотичное хранение трактуется инспектором как невыполнение программы контроля.",
+    check:"Проверьте: подшивку протоколов по годам, журнал ППК, отчёты о выполнении плана.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СП 1.1.1058-01",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Ответственный за санэпидрежим",
+    crmTag:["RPN_PPK_RISK"],
+    recommendationNo:"Внедрите единый порядок хранения протоколов ППК: подшивка, реестр, журнал, ответственный.",
+    recommendationPartial:"Закройте пробелы в подшивке протоколов и сверьте с графиком ППК.",
+    recommendationUnknown:"Запросите у медсестры и лаборатории все протоколы и систематизируйте их.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Протоколы и журналы ППК"
+  },
+
+  // ============ Документация, помещения и оборудование ============
+  { id:"RPN-007", direction:"rpn", section:"Документация, помещения и оборудование",
+    question:"Поддерживаются ли регулярные регламенты обслуживания на медицинскую технику: автоклавы, светильники, кресла, насосы, сушилки и компрессоры?",
+    explanation:"Без актуальных сервисных журналов и регламентов оборудование считается необслуживаемым — это претензия и к РПН, и к Росздравнадзору.",
+    check:"Проверьте: договоры на ТО, журнал ТО, паспорта оборудования, акты последних работ.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, технические паспорта производителей",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий / Инженер",
+    crmTag:["RPN_DOCUMENTS_RISK"],
+    recommendationNo:"Заключите договор на сервисное обслуживание со специализированной организацией и заведите журнал ТО.",
+    recommendationPartial:"Дополните журнал ТО недостающими актами и сверьте регулярность с регламентом производителя.",
+    recommendationUnknown:"Запросите у инженера журнал ТО и паспорта оборудования.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Сервисное обслуживание оборудования"
+  },
+  { id:"RPN-008", direction:"rpn", section:"Документация, помещения и оборудование",
+    question:"Соответствуют ли помещения и оборудование санитарным требованиям и заведены ли на них санитарные паспорта, сертификаты и регистрационные документы?",
+    explanation:"Нерегистрированное или несертифицированное оборудование — частая причина приостановки работы кабинета.",
+    check:"Проверьте: РУ Росздравнадзора, сертификаты соответствия, санитарные паспорта помещений.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.1.3678-21, ФЗ №323-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Управляющий",
+    crmTag:["RPN_PREMISES_RISK"],
+    recommendationNo:"Соберите регистрационные удостоверения по всему оборудованию и составьте реестр с реквизитами.",
+    recommendationPartial:"Дополните реестр недостающими РУ и сертификатами, обновите устаревшие.",
+    recommendationUnknown:"Запросите у инженера и закупщика полный список оборудования с документами.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Регистрационные документы оборудования"
+  },
+
+  // ============ Санитарно-эпидемиологический режим ============
+  { id:"RPN-009", direction:"rpn", section:"Санитарно-эпидемиологический режим",
+    question:"Утверждён ли регламент санитарно-эпидемиологического режима в клинике и доведён до персонала?",
+    explanation:"Регламент — основа всех проверочных вопросов по обработке, дезинфекции, обращению с отходами и стерилизации.",
+    check:"Проверьте: приказ об утверждении, текст регламента, листы ознакомления персонала.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Ответственный за санэпидрежим",
+    crmTag:["RPN_SANITARY_MODE_RISK"],
+    recommendationNo:"Разработайте и утвердите регламент санэпидрежима, ознакомьте с ним весь персонал под подпись.",
+    recommendationPartial:"Дополните регламент недостающими разделами: уборка, дезинфекция, обращение с отходами, СИЗ.",
+    recommendationUnknown:"Запросите у старшей медсестры действующий регламент и листы ознакомления.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Регламент санэпидрежима"
+  },
+  { id:"RPN-010", direction:"rpn", section:"Санитарно-эпидемиологический режим",
+    question:"Есть ли документально оформленные регламенты уборки: текущая уборка, генеральная уборка кабинетов, уборка с учётом зон — в графике для каждого помещения?",
+    explanation:"Журнал уборок — один из самых проверяемых: его отсутствие = массовая претензия к санэпидрежиму.",
+    check:"Проверьте: журналы уборки по кабинетам, графики, инструкции для уборщиц, дезсредства в зонах.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_SANITARY_MODE_RISK"],
+    recommendationNo:"Введите графики и журналы уборки по каждому кабинету, утвердите приказом.",
+    recommendationPartial:"Закройте пробелы в журналах уборок и в графике генеральных уборок.",
+    recommendationUnknown:"Запросите у старшей медсестры журналы уборок и графики.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Журналы и графики уборки"
+  },
+
+  // ============ Стерилизация медицинских изделий ============
+  { id:"RPN-011", direction:"rpn", section:"Стерилизация медицинских изделий",
+    question:"Соблюдаются ли все элементы стерилизации изделий: дезинфекция, предстерилизационная очистка, упаковка, стерилизация и контроль?",
+    explanation:"Нарушение цикла стерилизации создаёт прямой эпидемиологический риск и трактуется инспектором как критическое нарушение.",
+    check:"Проверьте: регламент, маршрутные листы изделий, журнал стерилизации, индикаторы, биотесты.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, МУ <<IDS_0008>>-09",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра / Ответственный ЦСО",
+    crmTag:["RPN_STERILIZATION_RISK"],
+    recommendationNo:"Внедрите полный цикл стерилизации: регламент, маршрутизация, индикаторы 5–6 класса, журнал.",
+    recommendationPartial:"Закройте пробелы цикла: чаще всего — отсутствие индикаторов или некорректная упаковка.",
+    recommendationUnknown:"Запросите у медсестры журнал стерилизации и маршрутные листы изделий.",
+    product:"Пакет инфекционной безопасности",
+    demo:true,
+    emailLabel:"Цикл стерилизации МИ"
+  },
+  { id:"RPN-012", direction:"rpn", section:"Стерилизация медицинских изделий",
+    question:"Ведутся ли журналы по стерилизации в полном виде: формы, журнал, индикаторы, биологический тест и температурные графики?",
+    explanation:"Без журналов и индикаторов невозможно подтвердить факт и параметры стерилизации.",
+    check:"Проверьте: журнал 257/у, отработанные индикаторы, протоколы биотестов, ленты автоклавов.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, Приказ 770",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_STERILIZATION_RISK","RPN_JOURNALS_RISK"],
+    recommendationNo:"Восстановите журналы стерилизации за 3 месяца, закупите индикаторы и био-тесты, назначьте ответственного.",
+    recommendationPartial:"Дополните журналы недостающими полями и индикаторами по каждому циклу.",
+    recommendationUnknown:"Запросите у медсестры все журналы стерилизации для аудита.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Журналы стерилизации и индикаторы"
+  },
+  { id:"RPN-013", direction:"rpn", section:"Стерилизация медицинских изделий",
+    question:"Проводится ли валидация процесса стерилизации с использованием биотестов, споров или других подтверждающих средств контроля?",
+    explanation:"Биологический контроль — обязательный элемент валидации; его отсутствие = критическое нарушение.",
+    check:"Проверьте: периодичность биотестов (не реже 1 раза в неделю), протоколы лаборатории, журнал.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_STERILIZATION_RISK"],
+    recommendationNo:"Заключите договор с лабораторией на биотесты не реже 1 раза в неделю и заведите журнал.",
+    recommendationPartial:"Сверьте периодичность биотестов с регламентом и закройте пробелы.",
+    recommendationUnknown:"Запросите у медсестры протоколы биотестов и договор с лабораторией.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Биологический контроль стерилизации"
+  },
+
+  // ============ Дезинфекция и предстерилизационная очистка ============
+  { id:"RPN-014", direction:"rpn", section:"Дезинфекция и предстерилизационная очистка",
+    question:"Есть ли регламент по дезинфекции и предстерилизационной очистке инструментов, обработке поверхностей, рукавов, бутылей и средств обеззараживания?",
+    explanation:"Без регламента невозможно обосновать корректность концентраций, экспозиции и выбора препаратов.",
+    check:"Проверьте: регламент, инструкции, таблицы концентраций, перечень дезсредств.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра / Ответственный за санэпидрежим",
+    crmTag:["RPN_DISINFECTION_RISK","RPN_STERILIZATION_RISK"],
+    recommendationNo:"Утвердите регламент дезинфекции и ПСО с таблицами концентраций и экспозиций.",
+    recommendationPartial:"Закройте пробелы регламента: чаще всего отсутствуют таблицы концентраций по конкретным препаратам.",
+    recommendationUnknown:"Запросите у медсестры регламент дезинфекции и инструкции к препаратам.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Регламент дезинфекции и ПСО"
+  },
+  { id:"RPN-015", direction:"rpn", section:"Дезинфекция и предстерилизационная очистка",
+    question:"Проверяется ли регулярно качество проведения предстерилизационной очистки с применением соответствующих экспресс-тестов?",
+    explanation:"Экспресс-тесты (амидопирин, азопирам) — обязательный элемент контроля ПСО, отсутствие фиксируется как нарушение.",
+    check:"Проверьте: журнал контроля ПСО, тесты в наличии, периодичность не реже 1 раза в день.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_DISINFECTION_RISK","RPN_JOURNALS_RISK"],
+    recommendationNo:"Закупите экспресс-тесты и введите ежедневный контроль ПСО с журналом.",
+    recommendationPartial:"Дополните журнал отсутствующими записями и сверьте регулярность.",
+    recommendationUnknown:"Запросите у медсестры журнал ПСО и наличие экспресс-тестов.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Контроль ПСО (экспресс-тесты)"
+  },
+
+  // ============ Медицинские отходы ============
+  { id:"RPN-016", direction:"rpn", section:"Медицинские отходы",
+    question:"Есть ли утверждённая схема обращения с медицинскими отходами по классам, местам накопления, путям, средствам и хранению?",
+    explanation:"Отсутствие схемы — типовое нарушение СанПиН по обращению с отходами.",
+    check:"Проверьте: схему, приказ, маркировку контейнеров, места накопления, пути транспортировки.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.1.3678-21",
+    future2027:"С 2027 г. ожидается переход на электронный учёт через ФГИС ОПВК и реестровых операторов.",
+    responsible:"Ответственный за обращение с отходами",
+    crmTag:["RPN_WASTE_B_RISK"],
+    recommendationNo:"Разработайте и утвердите схему обращения с медицинскими отходами с маркировкой и графиком.",
+    recommendationPartial:"Дополните схему недостающими элементами: места накопления, маршруты, СИЗ.",
+    recommendationUnknown:"Запросите у ответственного схему и приказ об её утверждении.",
+    product:"Пакет работы с отходами Б",
+    demo:false,
+    emailLabel:"Схема обращения с медотходами"
+  },
+  { id:"RPN-017", direction:"rpn", section:"Медицинские отходы",
+    question:"Прошло ли обучение персонала организации, который занят сбором, хранением и утилизацией медицинских отходов разных классов?",
+    explanation:"Допуск необученного персонала к работе с отходами — критическое нарушение.",
+    check:"Проверьте: удостоверения о прохождении обучения, приказ о допуске, журнал инструктажей.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Ответственный за обращение с отходами",
+    crmTag:["RPN_WASTE_B_RISK","RPN_PERSONNEL_TRAINING_RISK"],
+    recommendationNo:"Организуйте обучение персонала по обращению с медотходами и оформите приказы о допуске.",
+    recommendationPartial:"Закройте пробелы: некоторые сотрудники без удостоверений или просроченным сроком обучения.",
+    recommendationUnknown:"Запросите у HR удостоверения и приказы о допуске.",
+    product:"Пакет аттестации и обучения",
+    demo:false,
+    emailLabel:"Обучение персонала по отходам"
+  },
+
+  // ============ Инженерные системы ============
+  { id:"RPN-018", direction:"rpn", section:"Инженерные системы",
+    question:"Поддерживаются ли водоснабжение, канализация, отопление, вентиляция и кондициониро­вание в бесперебойном режиме?",
+    explanation:"Нарушения в инженерных системах = риск приостановки работы кабинета.",
+    check:"Проверьте: договоры на обслуживание, акты осмотра, протоколы вентиляции и микроклимата.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 1.2.3685-21, СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий / Инженер",
+    crmTag:["RPN_ENGINEERING_RISK","RPN_VENTILATION_RISK"],
+    recommendationNo:"Заключите договоры на обслуживание инженерных систем и заведите акты осмотра.",
+    recommendationPartial:"Дополните недостающие протоколы по вентиляции и микроклимату.",
+    recommendationUnknown:"Запросите у инженера договоры и акты по инженерным системам.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Инженерные системы клиники"
+  },
+  { id:"RPN-019", direction:"rpn", section:"Инженерные системы",
+    question:"Содержатся ли электрические системы здания на уровне с регулярными актами, проверкой защитного заземления?",
+    explanation:"Электробезопасность — обязательное требование, отсутствие актов = нарушение.",
+    check:"Проверьте: акты замеров заземления и сопротивления изоляции, договор на электрообслуживание.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ПУЭ, ПТЭЭП",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер",
+    crmTag:["RPN_ENGINEERING_RISK"],
+    recommendationNo:"Закажите замеры заземления и сопротивления изоляции, оформите акты.",
+    recommendationPartial:"Дополните недостающие акты и сверьте сроки повторных замеров.",
+    recommendationUnknown:"Запросите у инженера акты по электробезопасности.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Электробезопасность"
+  },
+
+  // ============ Учётные формы и первичная документация ============
+  { id:"RPN-020", direction:"rpn", section:"Учётные формы и первичная документация",
+    question:"Имеются ли учётные журналы, технологические регламенты, стерилизация, медотходы, предстерилизационной очистки и аварийных ситуаций?",
+    explanation:"Отсутствие журналов — самое частое нарушение, штраф до 30 тыс. руб. за каждый отсутствующий журнал.",
+    check:"Проверьте: реестр обязательных журналов, журналы стерилизации, ПСО, отходов, аварий, генуборок.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, Приказ 770",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_JOURNALS_RISK"],
+    recommendationNo:"Заведите все обязательные журналы по реестру и назначьте ответственных.",
+    recommendationPartial:"Закройте пробелы — часть журналов отсутствует или ведётся нерегулярно.",
+    recommendationUnknown:"Запросите у медсестры список ведущихся журналов и проведите ревизию.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Обязательные учётные журналы"
+  },
+  { id:"RPN-021", direction:"rpn", section:"Учётные формы и первичная документация",
+    question:"Соблюдена ли периодичность всех записей по уборке, проведению стерилизации, химической очистке и температурному учёту?",
+    explanation:"Нерегулярные записи трактуются как формальное ведение журналов и считаются нарушением.",
+    check:"Проверьте: даты записей, частота, отсутствие пропусков, подписи ответственных.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_JOURNALS_RISK"],
+    recommendationNo:"Введите контроль регулярности записей: ежедневный обход и подпись ответственного.",
+    recommendationPartial:"Закройте пропуски и установите контрольные точки для проверки журналов.",
+    recommendationUnknown:"Запросите у медсестры выборку журналов для проверки регулярности.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Регулярность записей в журналах"
+  },
+
+  // ============ Отходы класса Б ============
+  { id:"RPN-022", direction:"rpn", section:"Отходы класса Б",
+    question:"Заключён ли договор класса Б с лицензией, с лицензированной фирмой по вывозу, и сохраняется журнал движения с актами вывоза?",
+    explanation:"С 2027 г. договор должен быть только с оператором из федерального реестра + электронный учёт ФГИС.",
+    check:"Проверьте: договор, лицензию контрагента, акты вывоза за 3 месяца, журнал движения отходов.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026–2027",
+    source:"СанПиН 2.1.3678-21 (изм. 2027)",
+    future2027:"С 2027 г. — обязательная регистрация контрагентов в реестре ФГИС ОПВК и электронный учёт.",
+    responsible:"Ответственный за обращение с отходами",
+    crmTag:["RPN_WASTE_B_RISK"],
+    recommendationNo:"Срочно заключите договор с оператором из федерального реестра и подключитесь к ФГИС ОПВК.",
+    recommendationPartial:"Уточните, внесён ли ваш оператор в реестр и оформляются ли акты вывоза по новой форме.",
+    recommendationUnknown:"Запросите у администратора копии договора и актов вывоза за 3 месяца.",
+    product:"Пакет работы с отходами Б",
+    demo:true,
+    emailLabel:"Договор и журнал отходов класса Б"
+  },
+  { id:"RPN-023", direction:"rpn", section:"Отходы класса Б",
+    question:"Соблюдаются ли сроки, условия и порядок временного хранения отходов класса Б в клинике?",
+    explanation:"Превышение сроков хранения и несоответствие температурного режима — частое нарушение.",
+    check:"Проверьте: помещение для хранения, температурный режим, сроки накопления.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Ответственный за обращение с отходами",
+    crmTag:["RPN_WASTE_B_RISK"],
+    recommendationNo:"Организуйте отдельное помещение для хранения отходов Б с контролем температуры и сроков.",
+    recommendationPartial:"Закройте пробелы по температурному режиму и графику вывоза.",
+    recommendationUnknown:"Запросите у ответственного информацию о месте и порядке хранения.",
+    product:"Пакет работы с отходами Б",
+    demo:false,
+    emailLabel:"Хранение отходов класса Б"
+  },
+  { id:"RPN-024", direction:"rpn", section:"Отходы класса Б",
+    question:"Есть ли электронные системы и подключение к федеральной информационной системе по учёту обращения с отходами класса Б?",
+    explanation:"С 2027 г. бумажные журналы не принимаются — обязателен электронный учёт через ФГИС ОПВК.",
+    check:"Проверьте: подключение к ФГИС ОПВК, наличие ЭЦП ответственного, последние записи в системе.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Перспективный блок 2027",
+    horizon:"2026–2027",
+    source:"Постановление Правительства РФ + СанПиН 2.1.3678-21",
+    future2027:"С 2027 г. — переход на электронный учёт через ФГИС ОПВК и реестровых операторов.",
+    responsible:"Ответственный за обращение с отходами",
+    crmTag:["RPN_WASTE_B_RISK","MONITORING_2027_REQUIRED"],
+    recommendationNo:"До 2027 г. подключитесь к ФГИС ОПВК и назначьте ответственного с ЭЦП.",
+    recommendationPartial:"Проверьте полноту записей — в ФГИС должны быть все партии за период.",
+    recommendationUnknown:"Срочно уточните у ответственного статус подключения к ФГИС.",
+    product:"Пакет работы с отходами Б",
+    demo:true,
+    emailLabel:"Электронный учёт отходов (ФГИС)"
+  },
+
+  // ============ Дезинфицирующие средства и препараты ============
+  { id:"RPN-025", direction:"rpn", section:"Дезинфицирующие средства и препараты",
+    question:"Есть ли утверждённый перечень используемых дезинфицирующих средств с инструкциями, паспортами безопасности и учётом потребления?",
+    explanation:"Отсутствие инструкций и MSDS — типовое нарушение по дезсредствам.",
+    check:"Проверьте: перечень, инструкции, MSDS, журнал учёта расхода, ротация препаратов.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_DISINFECTION_RISK"],
+    recommendationNo:"Составьте перечень дезсредств, соберите инструкции и MSDS, заведите журнал учёта.",
+    recommendationPartial:"Дополните перечень недостающими инструкциями и MSDS.",
+    recommendationUnknown:"Запросите у медсестры перечень и документы по дезсредствам.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Перечень и документация дезсредств"
+  },
+  { id:"RPN-026", direction:"rpn", section:"Дезинфицирующие средства и препараты",
+    question:"Соблюдается ли периодичность, режим контроля рабочих растворов, расчёт расхода и эффективность применения с подтверждающими записями?",
+    explanation:"Без контроля концентраций — невозможно подтвердить эффективность дезинфекции.",
+    check:"Проверьте: контроль концентраций экспресс-тестами, журнал приготовления растворов.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_DISINFECTION_RISK"],
+    recommendationNo:"Закупите тест-полоски для контроля концентраций и заведите журнал приготовления растворов.",
+    recommendationPartial:"Закройте пробелы в журнале и проверьте полноту записей.",
+    recommendationUnknown:"Запросите у медсестры журналы по дезрастворам.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Контроль рабочих растворов дезсредств"
+  },
+
+  // ============ Персонал ============
+  { id:"RPN-027", direction:"rpn", section:"Персонал",
+    question:"Поддержано ли обучение медицинского по санитарному режиму, дезинфекции, отходам, технике, обращению и эпидемиологии?",
+    explanation:"Регулярное обучение персонала — обязательное требование, отсутствие = нарушение.",
+    check:"Проверьте: график обучений, журналы инструктажей, программу обучения, протоколы.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Старшая медсестра",
+    crmTag:["RPN_PERSONNEL_TRAINING_RISK"],
+    recommendationNo:"Утвердите программу и график обучения персонала, заведите журнал инструктажей.",
+    recommendationPartial:"Закройте пробелы по сотрудникам без отметок о пройденном обучении.",
+    recommendationUnknown:"Запросите у HR журнал обучений и программу.",
+    product:"Пакет аттестации и обучения",
+    demo:false,
+    emailLabel:"Обучение персонала по санрежиму"
+  },
+  { id:"RPN-028", direction:"rpn", section:"Персонал",
+    question:"Проведена ли аттестация персонала и периодические инструктажи на санитарные требования, гигиену, эпидемиологию, средства защиты и аварийные ситуации?",
+    explanation:"Допуск без аттестации = немедленное нарушение и риск для пациентов.",
+    check:"Проверьте: протоколы аттестации, журналы инструктажей, удостоверения.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, Приказ Минздрава 29н",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / HR",
+    crmTag:["RPN_PERSONNEL_TRAINING_RISK"],
+    recommendationNo:"Проведите аттестацию всего персонала и оформите протоколы. Введите регулярные инструктажи.",
+    recommendationPartial:"Закройте пробелы по сотрудникам без актуальной аттестации.",
+    recommendationUnknown:"Запросите у HR протоколы аттестации и журналы инструктажей.",
+    product:"Пакет аттестации и обучения",
+    demo:false,
+    emailLabel:"Аттестация и инструктажи персонала"
+  },
+
+  // ============ Медицинские книжки и медосмотры ============
+  { id:"RPN-029", direction:"rpn", section:"Медицинские книжки и медосмотры",
+    question:"Прошёл ли медицинские осмотры весь персонал и поддерживается ли актуальность медкнижек для медработников, врачей или младшего?",
+    explanation:"Допуск к работе без актуальных медкнижек = критическое нарушение и риск приостановки деятельности.",
+    check:"Проверьте: медкнижки всех сотрудников, отметки о медосмотре и аттестации текущего года.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Приказ Минздрава 29н, СП 2.1.3678-20",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"HR / Главный врач",
+    crmTag:["RPN_MEDBOOKS_RISK","RPN_PERSONNEL_TRAINING_RISK"],
+    recommendationNo:"Срочно организуйте медосмотр всех сотрудников, оформите медкнижки и аттестацию.",
+    recommendationPartial:"Закройте пробелы по сотрудникам с просроченным медосмотром.",
+    recommendationUnknown:"Запросите у HR/администратора реестр медкнижек.",
+    product:"Пакет аттестации и обучения",
+    demo:true,
+    emailLabel:"Медкнижки и медосмотры персонала"
+  },
+  { id:"RPN-030", direction:"rpn", section:"Медицинские книжки и медосмотры",
+    question:"Поддерживается ли учёт медицинских книжек, прививок, инструктажа и допуска медперсонала к работе?",
+    explanation:"Без реестра медкнижек невозможно подтвердить допуск персонала.",
+    check:"Проверьте: реестр медкнижек, журнал прививок, журнал допусков.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Приказ Минздрава 29н",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"HR",
+    crmTag:["RPN_MEDBOOKS_RISK"],
+    recommendationNo:"Заведите реестр медкнижек, журнал прививок и журнал допусков, назначьте ответственного.",
+    recommendationPartial:"Закройте пробелы в реестре по сотрудникам.",
+    recommendationUnknown:"Запросите у HR полный реестр медкнижек и допусков.",
+    product:"Пакет аттестации и обучения",
+    demo:false,
+    emailLabel:"Реестр медкнижек и допусков"
+  },
+
+  // ============ Внутренний аудит и локальные документы ============
+  { id:"RPN-031", direction:"rpn", section:"Внутренний аудит и локальные документы",
+    question:"Имеются ли утверждённые ло внутрифирменные регламенты, инструкции, схемы, технологии, регламенты и взаимодействия с подразделениями?",
+    explanation:"Локальные акты — основа управляемости и доказательство выстроенных процессов.",
+    check:"Проверьте: реестр локальных актов, приказы, инструкции, регламенты.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ТК РФ, ФЗ №323-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Юрист клиники",
+    crmTag:["RPN_GENERAL_RISK"],
+    recommendationNo:"Составьте реестр локальных актов и заведите типовые инструкции и регламенты.",
+    recommendationPartial:"Дополните реестр недостающими регламентами.",
+    recommendationUnknown:"Запросите у юриста полный комплект локальных актов.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Локальные акты и регламенты"
+  },
+  { id:"RPN-032", direction:"rpn", section:"Внутренний аудит и локальные документы",
+    question:"Проводится ли регулярный анализ соответствия требованиям с протоколами совещаний, планом исправлений и контролем?",
+    explanation:"Без внутреннего аудита нарушения накапливаются и обнаруживаются только при внешней проверке.",
+    check:"Проверьте: график внутреннего аудита, протоколы, планы исправлений, отчёты.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Ответственный за санэпидрежим",
+    crmTag:["RPN_GENERAL_RISK","RPN_DOCUMENTS_RISK"],
+    recommendationNo:"Введите график внутреннего аудита (1 раз в квартал) и оформление протоколов.",
+    recommendationPartial:"Дополните протоколы планами исправлений и контролем выполнения.",
+    recommendationUnknown:"Запросите у руководителя протоколы внутреннего аудита.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Внутренний аудит клиники"
+  },
+
+  // ============ Проверки, инспекции и взаимодействие с контролирующими ============
+  { id:"RPN-033", direction:"rpn", section:"Проверки, инспекции и взаимодействие с контролирующими органами",
+    question:"Есть ли история провёл проверок или инспекций Роспотребнадзора и других, описаны нарушения, журнал предписаний или подтверждение?",
+    explanation:"Журнал проверок — обязательный документ, отражающий статус взаимодействия с надзором.",
+    check:"Проверьте: журнал учёта проверок, копии актов и предписаний.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №248-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Юрист клиники / Главный врач",
+    crmTag:["RPN_CHECKS_PRESCRIPTIONS_RISK"],
+    recommendationNo:"Заведите журнал учёта проверок и систематизируйте копии актов и предписаний.",
+    recommendationPartial:"Дополните журнал недостающими записями и копиями.",
+    recommendationUnknown:"Запросите у юриста журнал и копии всех актов проверок.",
+    product:"Premium-сопровождение проверок",
+    demo:false,
+    emailLabel:"Журнал учёта проверок"
+  },
+  { id:"RPN-034", direction:"rpn", section:"Проверки, инспекции и взаимодействие с контролирующими органами",
+    question:"Заполняется ли форма контроля исполнения и сроку, и есть ли механизм, гарантирующий устранение нарушений?",
+    explanation:"Без формы контроля исполнения предписания считаются неустранёнными даже после выполнения.",
+    check:"Проверьте: формы контроля, отчёты в РПН, подтверждения устранения.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №248-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Юрист клиники / Главный врач",
+    crmTag:["RPN_CHECKS_PRESCRIPTIONS_RISK"],
+    recommendationNo:"Введите форму контроля исполнения предписаний с подписями и сроками.",
+    recommendationPartial:"Закройте пробелы по предписаниям без отчётов об устранении.",
+    recommendationUnknown:"Запросите у юриста реестр предписаний и формы контроля.",
+    product:"Premium-сопровождение проверок",
+    demo:true,
+    emailLabel:"Контроль устранения предписаний"
+  },
+
+  // ============ Лицензия и виды деятельности ============
+  { id:"RPN-035", direction:"rpn", section:"Лицензия и виды деятельности",
+    question:"Поддерживаются ли актуальной медицинской лицензией виды договора, фактический вид, рентгеновские и эпидемиологические процедуры?",
+    explanation:"Деятельность сверх лицензии — критическое нарушение, влечёт штраф и приостановку.",
+    check:"Проверьте: лицензию, перечень видов работ, соответствие фактической деятельности.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №323-ФЗ, Постановление № 852",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Юрист клиники / Главный врач",
+    crmTag:["RPN_LICENSE_RISK"],
+    recommendationNo:"Сверьте фактическую деятельность с перечнем видов работ в лицензии и закройте расхождения.",
+    recommendationPartial:"Дополните лицензию недостающими видами работ через Росздравнадзор.",
+    recommendationUnknown:"Запросите у юриста копию лицензии и перечень видов работ.",
+    product:"Premium-сопровождение проверок",
+    demo:false,
+    emailLabel:"Соответствие деятельности лицензии"
+  },
+  { id:"RPN-036", direction:"rpn", section:"Лицензия и виды деятельности",
+    question:"Соответствуют ли работники с лицензией, дипломами и допусками квалификации для оказания услуг, процедур, обследований, КТ или рентгеновской КТ?",
+    explanation:"Допуск без квалификации = нарушение и риск отзыва лицензии.",
+    check:"Проверьте: дипломы, сертификаты специалистов, допуски на специальные виды работ.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №323-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"HR / Главный врач",
+    crmTag:["RPN_LICENSE_RISK"],
+    recommendationNo:"Проверьте соответствие квалификации каждого специалиста и оформите недостающие допуски.",
+    recommendationPartial:"Закройте пробелы по сотрудникам с просроченными сертификатами.",
+    recommendationUnknown:"Запросите у HR реестр квалификационных документов.",
+    product:"Premium-сопровождение проверок",
+    demo:false,
+    emailLabel:"Квалификация специалистов"
+  },
+
+  // ============ Договоры с подрядчиками ============
+  { id:"RPN-037", direction:"rpn", section:"Договоры с подрядчиками",
+    question:"Заключены ли действующих договора с поставщ услуг и подряду: уборка, лабораторные исследования, утилизация, дезинфекция, прачка и поставщиками медоборудования?",
+    explanation:"Без договоров с подрядчиками клиника не может подтвердить выполнение санитарных требований.",
+    check:"Проверьте: реестр договоров, лицензии подрядчиков, акты выполненных работ.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий / Юрист клиники",
+    crmTag:["RPN_CONTRACTORS_RISK","RPN_DOCUMENTS_RISK"],
+    recommendationNo:"Соберите реестр договоров с подрядчиками и приложите лицензии.",
+    recommendationPartial:"Дополните реестр недостающими договорами и лицензиями.",
+    recommendationUnknown:"Запросите у юриста полный реестр договоров.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Договоры с подрядчиками"
+  },
+  { id:"RPN-038", direction:"rpn", section:"Договоры с подрядчиками",
+    question:"Проверяются ли документы подрядчиков: лицензии или сертификаты услуг, налоги, сертификаты и сроки оказания договорных обязательств?",
+    explanation:"Просроченные лицензии подрядчиков = нарушение со стороны клиники.",
+    check:"Проверьте: актуальность лицензий подрядчиков, сертификаты, сроки.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №99-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Юрист клиники",
+    crmTag:["RPN_CONTRACTORS_RISK"],
+    recommendationNo:"Введите регламент проверки лицензий подрядчиков на актуальность.",
+    recommendationPartial:"Закройте пробелы по подрядчикам с просроченными лицензиями.",
+    recommendationUnknown:"Запросите у юриста реестр подрядчиков с актуальностью лицензий.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Контроль лицензий подрядчиков"
+  },
+
+  // ============ Жалобы, инциденты и риск-менеджмент ============
+  { id:"RPN-039", direction:"rpn", section:"Жалобы, инциденты и риск-менеджмент",
+    question:"Имеется ли журнал для приёма жалоб, инцидентов и претензий пациентов?",
+    explanation:"Журнал жалоб — обязательный документ для защиты прав пациентов.",
+    check:"Проверьте: журнал жалоб, форму приёма, регламент рассмотрения.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №323-ФЗ, ФЗ №2300-1",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий / Юрист клиники",
+    crmTag:["RPN_PATIENT_COMPLAINT_RISK"],
+    recommendationNo:"Заведите журнал жалоб и регламент рассмотрения обращений пациентов.",
+    recommendationPartial:"Дополните журнал недостающими разделами и сроками.",
+    recommendationUnknown:"Запросите у управляющего журнал жалоб для аудита.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Журнал жалоб пациентов"
+  },
+  { id:"RPN-040", direction:"rpn", section:"Жалобы, инциденты и риск-менеджмент",
+    question:"Регистрируются ли жалобы, инциденты и аварийные при контактах персонала, инфекционных и эпидемиологических случаях?",
+    explanation:"Аварийные ситуации (укол, разлив) — обязательная регистрация для эпидемиологического контроля.",
+    check:"Проверьте: журнал аварий, ВИЧ-аптечку, протоколы расследований.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра / Главный врач",
+    crmTag:["RPN_PATIENT_COMPLAINT_RISK"],
+    recommendationNo:"Заведите журнал аварийных ситуаций и укомплектуйте ВИЧ-аптечку.",
+    recommendationPartial:"Дополните журнал недостающими протоколами расследований.",
+    recommendationUnknown:"Запросите у медсестры журнал аварий и состав ВИЧ-аптечки.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Журнал аварийных ситуаций"
+  },
+
+  // ============ Веб-сайт и риск-менеджмент ============
+  { id:"RPN-041", direction:"rpn", section:"Веб-сайт и риск-менеджмент",
+    question:"Есть ли актуальный веб-сайт организации со сведениями обязательной информации, требуемой для 2026 года?",
+    explanation:"Состав информации на сайте регламентирован законом — отсутствие = штраф до 30 тыс. руб.",
+    check:"Проверьте: лицензия на сайте, прайс, перечень услуг, реквизиты, политика ПДн.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:2, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Постановление Правительства РФ № 1006",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий / Юрист клиники",
+    crmTag:["RPN_DOCUMENTS_RISK"],
+    recommendationNo:"Проверьте обязательный состав сведений на сайте и опубликуйте недостающие документы.",
+    recommendationPartial:"Дополните сайт недостающей информацией: лицензия, прайс, политика ПДн.",
+    recommendationUnknown:"Запросите у маркетолога/IT актуальный состав сведений на сайте.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Состав информации на сайте"
+  },
+  { id:"RPN-042", direction:"rpn", section:"Веб-сайт и риск-менеджмент",
+    question:"Размещены ли разъ электронных сведений по обязательной информации с указанием реквизитов, ответственным и сайтом?",
+    explanation:"Несоответствие требованиям к публикации = повод для предписания РПН.",
+    check:"Проверьте: ответственного за сайт, актуальность реквизитов, доступность информации.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Постановление Правительства РФ № 1006",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий",
+    crmTag:["RPN_DOCUMENTS_RISK"],
+    recommendationNo:"Назначьте ответственного за актуальность сайта и обновите реквизиты.",
+    recommendationPartial:"Закройте пробелы в обязательной информации.",
+    recommendationUnknown:"Запросите у управляющего регламент публикации сведений.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Актуальность сведений сайта"
+  },
+
+  // ============ Средства индивидуальной защиты и спецодежда ============
+  { id:"RPN-043", direction:"rpn", section:"Средства индивидуальной защиты и спецодежда",
+    question:"Обеспечен ли персонал средствами индивидуальной защиты и спецодежды по типам видов и видам работ?",
+    explanation:"Без СИЗ медперсонал не имеет права работать = немедленное нарушение.",
+    check:"Проверьте: нормы выдачи СИЗ, реестр выдач, наличие на местах.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, ТК РФ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра / HR",
+    crmTag:["RPN_PPE_RISK"],
+    recommendationNo:"Утвердите нормы выдачи СИЗ и заведите реестр с подписями сотрудников.",
+    recommendationPartial:"Закройте пробелы по выдаче СИЗ отдельным сотрудникам.",
+    recommendationUnknown:"Запросите у HR реестр выдачи СИЗ.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Обеспечение СИЗ персонала"
+  },
+  { id:"RPN-044", direction:"rpn", section:"Средства индивидуальной защиты и спецодежда",
+    question:"Проводится ли уборка спецодежды, перчаток, масок, фартуков для безопасного обращения медотходами и инфекционными рисками?",
+    explanation:"Несоответствие обработки спецодежды = эпидемиологический риск.",
+    check:"Проверьте: договор с прачечной/регламент стирки, журнал обработки.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра",
+    crmTag:["RPN_PPE_RISK"],
+    recommendationNo:"Заключите договор с прачечной или утвердите регламент обработки спецодежды.",
+    recommendationPartial:"Закройте пробелы в журнале обработки.",
+    recommendationUnknown:"Запросите у медсестры регламент обработки спецодежды.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Обработка спецодежды и СИЗ"
+  },
+
+  // ============ Водные линии, ИВУ и стоматологические установки ============
+  { id:"RPN-045", direction:"rpn", section:"Водные линии, ИВУ и стоматологические установки",
+    question:"ДЛЯ СТОМАТОЛОГИИ: проводится ли регулярная очистка водных линий, наконечников, аспирационной системы, компрессоров и стоматологических установок?",
+    explanation:"Биоплёнка в водных линиях — частая причина внутрибольничной инфекции. Контроль обязателен.",
+    check:"Проверьте: регламент дезинфекции, журнал, наличие средств для линий (например, Alpron).",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21, инструкции производителей",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра / Инженер",
+    crmTag:["RPN_WATERLINES_RISK","RPN_HANDPIECES_RISK"],
+    recommendationNo:"Закупите средства для водных линий и введите еженедельный регламент с журналом.",
+    recommendationPartial:"Проверьте регулярность и охват всех установок.",
+    recommendationUnknown:"Уточните у инженера, есть ли регламент обслуживания установок.",
+    product:"Пакет инфекционной безопасности",
+    demo:true,
+    emailLabel:"Дезинфекция водных линий и наконечников"
+  },
+  { id:"RPN-046", direction:"rpn", section:"Водные линии, ИВУ и стоматологические установки",
+    question:"Соблюдается ли регламент, периодичность, контрольные и техника обработки водных линий или другой проток воды?",
+    explanation:"Без регламента невозможно подтвердить, что обработка ведётся правильно и регулярно.",
+    check:"Проверьте: регламент, журнал обработки, протоколы контроля воды.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер / Старшая медсестра",
+    crmTag:["RPN_WATERLINES_RISK"],
+    recommendationNo:"Утвердите регламент и периодичность обработки водных линий, заведите журнал.",
+    recommendationPartial:"Закройте пробелы в журнале обработки.",
+    recommendationUnknown:"Запросите у инженера регламент и журнал по водным линиям.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Регламент обработки водных линий"
+  },
+
+  // ============ Воздушная среда и вентиляция ============
+  { id:"RPN-047", direction:"rpn", section:"Воздушная среда и вентиляция",
+    question:"Поддерживается ли качество вентиляции, кондиционеров, воздуховодов и параметры микроклимата помещений?",
+    explanation:"Параметры воздуха измеряются в рамках ППК и часто не соответствуют норме.",
+    check:"Проверьте: договор на ТО вентиляции, протоколы микроклимата, акты очистки воздуховодов.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 1.2.3685-21, СанПиН 2.1.3678-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер",
+    crmTag:["RPN_PREMISES_RISK","RPN_VENTILATION_RISK"],
+    recommendationNo:"Заключите договор на ТО вентиляции и закажите замеры микроклимата.",
+    recommendationPartial:"Закройте пробелы в актах ТО и протоколах.",
+    recommendationUnknown:"Запросите у инженера договор и протоколы по вентиляции.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Вентиляция и микроклимат"
+  },
+  { id:"RPN-048", direction:"rpn", section:"Воздушная среда и вентиляция",
+    question:"Есть ли актуальные регламенты по вентиляции: периодическое обслуживание, проверка фильтров, обеззараживание воздушной системы для стерильности?",
+    explanation:"Без регламента и фильтрации воздуха не выполняется требование к чистоте помещений категорий А и Б.",
+    check:"Проверьте: регламент, журнал замены фильтров, обеззараживатели воздуха.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер",
+    crmTag:["RPN_PREMISES_RISK","RPN_VENTILATION_RISK"],
+    recommendationNo:"Утвердите регламент обслуживания вентиляции и заведите журнал замены фильтров.",
+    recommendationPartial:"Закройте пробелы по фильтрам и обеззараживателям воздуха.",
+    recommendationUnknown:"Запросите у инженера журнал замены фильтров.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Регламент вентиляции и фильтрации"
+  },
+
+  // ============ Бактерицидные лампы и обеззараживание воздуха ============
+  { id:"RPN-049", direction:"rpn", section:"Бактерицидные лампы и обеззараживание воздуха",
+    question:"Есть ли паспорта, инструкции, формы накопления и журнал применения бактерицидных ламп, использованных для обеззараживания воздуха?",
+    explanation:"Лампы имеют ограниченный ресурс (8000 ч). Без учёта эффективность падает, а РПН требует расчёт.",
+    check:"Проверьте: журнал учёта часов, паспорта ламп, расчёт остаточного ресурса.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Р 3.5.1904-04, СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер / Старшая медсестра",
+    crmTag:["RPN_BACTERICIDAL_LAMPS_RISK"],
+    recommendationNo:"Заведите журнал учёта часов и проведите расчёт остаточного ресурса по всем лампам.",
+    recommendationPartial:"Дополните журнал недостающими данными по лампам.",
+    recommendationUnknown:"Запросите у инженера паспорта облучателей и журнал учёта.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Журнал бактерицидных ламп"
+  },
+  { id:"RPN-050", direction:"rpn", section:"Бактерицидные лампы и обеззараживание воздуха",
+    question:"Ведётся ли учёт количества часов, замены ламп или средств в каждом обеззараживания обеззараживателей для бактерицидного контроля?",
+    explanation:"Без учёта ресурса невозможно подтвердить эффективность обеззараживания.",
+    check:"Проверьте: периодичность замены ламп, журнал, акты замены.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:4, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"Р 3.5.1904-04",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер",
+    crmTag:["RPN_BACTERICIDAL_LAMPS_RISK"],
+    recommendationNo:"Введите учёт часов работы ламп и графики замены.",
+    recommendationPartial:"Закройте пробелы в журнале по отдельным лампам.",
+    recommendationUnknown:"Запросите у инженера сведения о ресурсе ламп.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Учёт ресурса ламп"
+  },
+
+  // ============ Профилактика рисков заражения и инфекционная среда ============
+  { id:"RPN-051", direction:"rpn", section:"Профилактика рисков заражения и инфекционная среда",
+    question:"Есть ли система контроля над инциденты заражения и комплексные мероприятия профилактики для предотвращения внутрибольничного заражения?",
+    explanation:"Профилактика ИСМП — обязательный элемент санэпидрежима, отсутствие = критическое нарушение.",
+    check:"Проверьте: программу профилактики ИСМП, протоколы, регистрацию случаев.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач / Ответственный за санэпидрежим",
+    crmTag:["RPN_INFECTION_CONTROL_RISK"],
+    recommendationNo:"Утвердите программу профилактики ИСМП с регистрацией случаев и расследованием.",
+    recommendationPartial:"Закройте пробелы по протоколам профилактики.",
+    recommendationUnknown:"Запросите у руководителя программу профилактики ИСМП.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Профилактика ИСМП"
+  },
+  { id:"RPN-052", direction:"rpn", section:"Профилактика рисков заражения и инфекционная среда",
+    question:"Имеют ли персонал реальные навыки при контактах заражения: укол, разл, контакт с инфекционным материалом, нужна ли первичная медицинская?",
+    explanation:"Без отработанных алгоритмов сотрудники не знают, как действовать при аварии с биоматериалом.",
+    check:"Проверьте: алгоритмы при аварии, ВИЧ-аптечку, журнал учений.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 3.3686-21",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Старшая медсестра / Главный врач",
+    crmTag:["RPN_INFECTION_CONTROL_RISK","RPN_PERSONNEL_TRAINING_RISK"],
+    recommendationNo:"Утвердите алгоритм действий при аварии и проведите тренинг персонала.",
+    recommendationPartial:"Закройте пробелы по обучению персонала и наполнению ВИЧ-аптечки.",
+    recommendationUnknown:"Запросите у медсестры алгоритм и состав ВИЧ-аптечки.",
+    product:"Пакет инфекционной безопасности",
+    demo:false,
+    emailLabel:"Алгоритмы аварийных ситуаций"
+  },
+
+  // ============ Информационное обеспечение и потребитель ============
+  { id:"RPN-053", direction:"rpn", section:"Информационное обеспечение и потребитель",
+    question:"Размещена ли необходимая информация для пациентов: лицензия, перечень от услуг, права пациента, порядок предоставления документов и контактов организации?",
+    explanation:"Это требование закона о защите прав потребителей; нарушение = штраф до 30 тыс. руб.",
+    check:"Проверьте: уголок потребителя, лицензию, перечень услуг, прайс, контакты.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №2300-1, Постановление № 1006",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий",
+    crmTag:["RPN_CONSUMER_RIGHTS_RISK"],
+    recommendationNo:"Оформите уголок потребителя и разместите обязательную информацию для пациентов.",
+    recommendationPartial:"Дополните уголок недостающими документами.",
+    recommendationUnknown:"Запросите у управляющего состав информации для пациентов.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Информация для пациентов"
+  },
+  { id:"RPN-054", direction:"rpn", section:"Информационное обеспечение и потребитель",
+    question:"Проводят ли по инициативе пациентов разъяснения требований, инструкции работы и поведения в случае или после установления диагноза болезни?",
+    explanation:"Памятки и инструкции — часть культуры безопасности и часто проверяются.",
+    check:"Проверьте: памятки пациенту, информированное согласие, регламент консультирования.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №323-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Главный врач",
+    crmTag:["RPN_PERSONNEL_TRAINING_RISK"],
+    recommendationNo:"Разработайте памятки и инструкции для пациентов и форму информированного согласия.",
+    recommendationPartial:"Дополните комплект недостающими формами.",
+    recommendationUnknown:"Запросите у медсестры комплект памяток и согласий.",
+    product:"Standard-пакет документации",
+    demo:false,
+    emailLabel:"Памятки и согласия пациентов"
+  },
+
+  // ============ Главная вывеска и права потребителя ============
+  { id:"RPN-055", direction:"rpn", section:"Главная вывеска и права потребителя",
+    question:"Поддерживается ли вывеска, регистрационная табличка, прайс-лист и наличие контактов органов защиты прав потребителей?",
+    explanation:"Состав вывески регламентирован — нарушение типовое.",
+    check:"Проверьте: вывеску, табличку, прайс, контакты Роспотребнадзора.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №2300-1",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий",
+    crmTag:["RPN_CONSUMER_RIGHTS_RISK"],
+    recommendationNo:"Оформите вывеску и табличку с реквизитами и контактами надзорных органов.",
+    recommendationPartial:"Дополните вывеску недостающими сведениями.",
+    recommendationUnknown:"Запросите у управляющего фото вывески и состав сведений.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Вывеска и табличка организации"
+  },
+  { id:"RPN-056", direction:"rpn", section:"Главная вывеска и права потребителя",
+    question:"Есть ли механизм рассмотрения претензий, обращений, советов пациентам и обработки обращений по средствам связи?",
+    explanation:"Прозрачный механизм работы с обращениями — часть прав потребителей.",
+    check:"Проверьте: регламент работы с обращениями, ответственных, сроки.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:3, critical:false,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"ФЗ №2300-1, ФЗ №59-ФЗ",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Управляющий / Юрист клиники",
+    crmTag:["RPN_CONSUMER_RIGHTS_RISK","RPN_PATIENT_COMPLAINT_RISK"],
+    recommendationNo:"Утвердите регламент работы с обращениями пациентов с указанием сроков и ответственных.",
+    recommendationPartial:"Закройте пробелы в регламенте.",
+    recommendationUnknown:"Запросите у управляющего регламент работы с обращениями.",
+    product:"Core-пакет журналов",
+    demo:false,
+    emailLabel:"Работа с обращениями пациентов"
+  },
+
+  // ============ Рентген, КТ и радиология ============
+  { id:"RPN-057", direction:"rpn", section:"Рентген, КТ и радиология",
+    question:"Если используется рентген, КТ или другое радиологическое оборудование, есть ли разрешения регулятора на использование, паспорта, дозиметрия и связь работодателя?",
+    explanation:"Радиологическое оборудование требует особых документов; их отсутствие = критическое нарушение.",
+    check:"Проверьте: лицензию на работы с источниками, санитарный паспорт, дозиметрию, СИЗ.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.6.1.3288-25, ФЗ №3-ФЗ «О радиационной безопасности»",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер / Главный врач",
+    crmTag:["RPN_XRAY_SANITARY_RISK"],
+    recommendationNo:"Оформите санитарный паспорт рентген-кабинета, лицензию на источники и дозиметрический контроль.",
+    recommendationPartial:"Закройте пробелы по дозиметрии и СИЗ персонала.",
+    recommendationUnknown:"Запросите у инженера санитарный паспорт и протоколы дозиметрии.",
+    product:"Premium-сопровождение проверок",
+    demo:true,
+    emailLabel:"Радиологическое оборудование"
+  },
+  { id:"RPN-058", direction:"rpn", section:"Рентген, КТ и радиология",
+    question:"Регистрируются ли результаты и периодические измерения и нормы радиационно-санитарных для всех контролируемых, рабочих сред, кабинетов, аппаратов и средств защиты?",
+    explanation:"Без регулярных дозиметрических измерений невозможно подтвердить безопасность работы.",
+    check:"Проверьте: журнал дозиметрии, протоколы измерений, индивидуальные дозиметры персонала.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:5, critical:true,
+    normStatus:"Действующее требование",
+    horizon:"2026",
+    source:"СанПиН 2.6.1.3288-25",
+    future2027:FUTURE_2027_DEFAULT,
+    responsible:"Инженер",
+    crmTag:["RPN_XRAY_SANITARY_RISK"],
+    recommendationNo:"Заключите договор на дозиметрический контроль и заведите журналы измерений.",
+    recommendationPartial:"Закройте пробелы по измерениям и индивидуальным дозиметрам.",
+    recommendationUnknown:"Запросите у инженера журнал дозиметрии.",
+    product:"Premium-сопровождение проверок",
+    demo:false,
+    emailLabel:"Дозиметрия и радиационный контроль"
+  },
+
+  // ============ Готовность к санитарной реформе 2027 ============
+  { id:"RPN-059", direction:"rpn", section:"Готовность к санитарной реформе 2027 года",
+    question:"Готовится ли организация план по выполнению грядущих изменений законодательства, включая адаптацию работы и документации, которые могут вступать в силу в 2027 году?",
+    explanation:"Это направление, а не текущее требование. Раннее планирование позволяет избежать штрафов на старте 2027 г.",
+    check:"Проверьте: дорожную карту изменений 2027, ответственного за мониторинг норм.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:2, critical:false,
+    normStatus:"Перспективный блок 2027",
+    horizon:"Концепция 2027",
+    source:"Концепция санитарного законодательства РФ",
+    future2027:FUTURE_2027_REFORM,
+    responsible:"Главный врач / Юрист клиники",
+    crmTag:["RPN_2027_MONITORING","MONITORING_2027_REQUIRED"],
+    recommendationNo:"Назначьте ответственного за мониторинг изменений 2027 г. и составьте дорожную карту адаптации.",
+    recommendationPartial:"Дополните план изменений недостающими блоками (отходы Б, ФГИС, обучение персонала).",
+    recommendationUnknown:"Уточните у руководителя клиники наличие плана адаптации к 2027.",
+    product:"Подготовка к реформе 2027",
+    demo:false,
+    emailLabel:"План адаптации к реформе 2027"
+  },
+  { id:"RPN-060", direction:"rpn", section:"Готовность к санитарной реформе 2027 года",
+    question:"Изучены ли потенциальные требования санитарной реформы 2027 года к процессам клиники по отчётности, документации, отходами, стерилизации, СИЗам, медкнижкам и другим?",
+    explanation:"Это направление концепции, а не закон с конкретной датой штрафа. Цель — заранее оценить готовность.",
+    check:"Проверьте: матрицу соответствия процессов клиники анонсированным требованиям 2027.",
+    answers:["Да","Нет","Частично","Не знаю","Не применимо"],
+    weight:2, critical:false,
+    normStatus:"Перспективный блок 2027",
+    horizon:"Концепция 2027",
+    source:"Концепция санитарного законодательства РФ",
+    future2027:FUTURE_2027_REFORM,
+    responsible:"Главный врач / Ответственный за санэпидрежим",
+    crmTag:["RPN_2027_MONITORING","MONITORING_2027_REQUIRED"],
+    recommendationNo:"Составьте матрицу соответствия процессов клиники требованиям реформы 2027.",
+    recommendationPartial:"Дополните матрицу недостающими процессами и оцените разрывы.",
+    recommendationUnknown:"Запросите у руководителя анализ требований 2027 для клиники.",
+    product:"Подготовка к реформе 2027",
+    demo:false,
+    emailLabel:"Матрица готовности к реформе 2027"
+  }
+];
+
+const answers = {};
+const ANS_WEIGHT = { yes:1.0, partial:0.5, no:0, unknown:0.2, na:null };
+const ANS_LABEL  = { yes:"Да", no:"Нет", partial:"Частично", unknown:"Не знаю", na:"Не применимо" };
+
+/* ====================================================================
+   localStorage (автосохранение прогресса)
+==================================================================== */
+const STORAGE_KEY = 'rpn-checklist-v0.4-full-60';
+const STORAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function saveState(){
+  try{
+    const state = {
+      v: '0.4',
+      ts: Date.now(),
+      answers: {...answers},
+      lead: {
+        name:   document.getElementById('lead-name').value,
+        role:   document.getElementById('lead-role').value,
+        clinic: document.getElementById('lead-clinic').value,
+        city:   document.getElementById('lead-city').value,
+        phone:  document.getElementById('lead-phone').value,
+        email:  document.getElementById('lead-email').value,
+        consent:document.getElementById('lead-consent').checked
+      }
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    flashAutosave();
+  }catch(e){ console.warn('[localStorage] save failed:', e); }
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const s = JSON.parse(raw);
+    if(!s.ts || (Date.now() - s.ts) > STORAGE_TTL_MS){
+      localStorage.removeItem(STORAGE_KEY);
+      return false;
+    }
+    if(s.lead){
+      document.getElementById('lead-name').value   = s.lead.name   || '';
+      document.getElementById('lead-role').value   = s.lead.role   || '';
+      document.getElementById('lead-clinic').value = s.lead.clinic || '';
+      document.getElementById('lead-city').value   = s.lead.city   || '';
+      document.getElementById('lead-phone').value  = s.lead.phone  || '';
+      document.getElementById('lead-email').value  = s.lead.email  || '';
+      if(typeof s.lead.consent === 'boolean'){
+        document.getElementById('lead-consent').checked = s.lead.consent;
+      }
+    }
+    if(s.answers && typeof s.answers === 'object'){
+      Object.keys(s.answers).forEach(qid=>{
+        if(questions.find(q=>q.id===qid)){
+          answers[qid] = s.answers[qid];
+        }
+      });
+    }
+    return true;
+  }catch(e){
+    console.warn('[localStorage] load failed:', e);
+    return false;
+  }
+}
+
+function clearState(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
+
+function flashAutosave(){
+  const el = document.getElementById('autosave-indicator');
+  if(!el) return;
+  el.classList.add('saved');
+  el.querySelector('span').textContent = 'Сохранено локально · ' + new Date().toLocaleTimeString('ru-RU');
+  clearTimeout(window._asT);
+  window._asT = setTimeout(()=>{
+    el.classList.remove('saved');
+    el.querySelector('span').textContent = 'Автосохранение прогресса локально';
+  }, 2000);
+}
+
+let _saveT;
+function saveStateDebounced(){ clearTimeout(_saveT); _saveT = setTimeout(saveState, 400); }
+
+/* ====================================================================
+   Антиспам-валидация
+==================================================================== */
+const DISPOSABLE_EMAIL_DOMAINS = [
+  'mailinator.com','tempmail.com','tempmail.net','10minutemail.com','10minutemail.net',
+  'guerrillamail.com','guerrillamail.net','yopmail.com','trashmail.com','trashmail.net',
+  'getnada.com','dispostable.com','sharklasers.com','maildrop.cc','throwawaymail.com',
+  'fakeinbox.com','mintemail.com','mohmal.com','tempr.email','spambox.us',
+  'temp-mail.org','temp-mail.io','emailondeck.com','mailnesia.com','mytemp.email'
+];
+const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+function validateEmail(email){
+  email = (email||'').trim().toLowerCase();
+  if(!email) return {ok:false, reason:'Введите e-mail'};
+  if(email.length > 120) return {ok:false, reason:'E-mail слишком длинный'};
+  if(!EMAIL_RE.test(email)) return {ok:false, reason:'Некорректный формат e-mail'};
+  const domain = email.split('@')[1];
+  if(DISPOSABLE_EMAIL_DOMAINS.some(d => domain === d || domain.endsWith('.'+d))){
+    return {ok:false, reason:'Временные/одноразовые e-mail не принимаются'};
+  }
+  if(/\.{2,}/.test(email)) return {ok:false, reason:'Некорректный формат e-mail'};
+  return {ok:true};
+}
+
+function validatePhone(phone){
+  phone = (phone||'').trim();
+  if(!phone) return {ok:false, reason:'Введите телефон'};
+  const digits = phone.replace(/\D/g,'');
+  if(digits.length < 10) return {ok:false, reason:'Слишком мало цифр (минимум 10)'};
+  if(digits.length > 15) return {ok:false, reason:'Слишком много цифр (максимум 15)'};
+  if(/^(\d)\1+$/.test(digits)) return {ok:false, reason:'Подозрительный номер (все цифры одинаковые)'};
+  if(/^1234567|^0123456|^7777777|^9999999/.test(digits)) return {ok:false, reason:'Подозрительный номер'};
+  if(digits.length === 11 && !/^[78]/.test(digits)){
+    return {ok:false, reason:'Российский номер должен начинаться с 7 или 8'};
+  }
+  return {ok:true, normalized: digits};
+}
+
+function validateName(name){
+  name = (name||'').trim();
+  if(!name) return {ok:false, reason:'Введите ФИО'};
+  if(name.length < 4) return {ok:false, reason:'ФИО слишком короткое'};
+  if(name.length > 120) return {ok:false, reason:'ФИО слишком длинное'};
+  const words = name.split(/\s+/).filter(w => /[A-Za-zА-Яа-яЁё]{2,}/.test(w));
+  if(words.length < 2) return {ok:false, reason:'Введите минимум имя и фамилию'};
+  return {ok:true};
+}
+
+function formatPhoneInput(e){
+  const el = e.target;
+  let v = el.value.replace(/\D/g,'');
+  if(!v){ el.value = ''; return; }
+  if(v.length === 11 && /^[78]/.test(v)){
+    el.value = '+7 ' + v.slice(1,4) + ' ' + v.slice(4,7) + '-' + v.slice(7,9) + '-' + v.slice(9,11);
+  } else if(v.length === 10){
+    el.value = '+7 ' + v.slice(0,3) + ' ' + v.slice(3,6) + '-' + v.slice(6,8) + '-' + v.slice(8,10);
+  } else {
+    el.value = '+' + v;
+  }
+}
+
+function showFieldError(id, msg){
+  const input = document.getElementById('lead-'+id);
+  const err = document.getElementById('err-'+id);
+  if(input) input.classList.add('invalid');
+  if(err){ err.textContent = msg; err.classList.add('show'); }
+}
+function clearFieldError(id){
+  const input = document.getElementById('lead-'+id);
+  const err = document.getElementById('err-'+id);
+  if(input) input.classList.remove('invalid');
+  if(err) err.classList.remove('show');
+}
+
+let firstInteractionTs = null;
+function markFirstInteraction(){ if(!firstInteractionTs) firstInteractionTs = Date.now(); }
+
+/* ====================================================================
+   РЕНДЕР ВОПРОСОВ
+==================================================================== */
+function renderQuestions(){
+  const container = document.getElementById('questions-container');
+  container.innerHTML = questions.map((q,i)=>{
+    const showFutureBadge = (q.horizon && q.horizon.includes('2027')) || (q.normStatus && q.normStatus.indexOf('Перспективн') === 0);
+    return `
+    <div class="qcard" data-id="${q.id}" id="qcard-${q.id}">
+      <div class="qcard-head">
+        <span class="qcard-section">${q.section}</span>
+        ${q.critical ? '<span class="qcard-tag critical">КРИТИЧНО</span>' : ''}
+        <span class="qcard-tag weight">Вес ×${q.weight}</span>
+        ${showFutureBadge ? '<span class="qcard-tag future">Контролируется 2027</span>' : ''}
+        ${q.demo ? '<span class="qcard-tag demo">DEMO</span>' : ''}
+      </div>
+      <div class="qcard-q">${i+1}. ${q.question}</div>
+      <div class="qcard-meta">
+        <b>Зачем:</b> ${q.explanation}
+        <span class="meta-row"><b>Статус:</b> ${q.normStatus}</span>
+        <span class="meta-row"><b>Горизонт:</b> ${q.horizon}</span>
+        <span class="meta-row"><b>Ответственный:</b> ${q.responsible}</span>
+        <span class="meta-row"><b>Источник:</b> ${q.source}</span>
+      </div>
+      <div class="qcard-check"><i class="fas fa-search"></i> <b>Что проверить:</b> ${q.check}</div>
+      ${showFutureBadge ? `<div class="qcard-future"><i class="fas fa-calendar-alt"></i> <b>Перспектива 2027:</b> ${q.future2027}</div>` : ''}
+      <div class="qcard-answers" data-qid="${q.id}">
+        <button class="ans-btn" data-ans="yes" onclick="setAnswer('${q.id}','yes')">✅ Да</button>
+        <button class="ans-btn" data-ans="no" onclick="setAnswer('${q.id}','no')">❌ Нет</button>
+        <button class="ans-btn" data-ans="partial" onclick="setAnswer('${q.id}','partial')">🟡 Частично</button>
+        <button class="ans-btn" data-ans="unknown" onclick="setAnswer('${q.id}','unknown')">❓ Не знаю</button>
+        <button class="ans-btn" data-ans="na" onclick="setAnswer('${q.id}','na')">⊘ Не применимо</button>
+      </div>
+      <div class="qcard-rec" id="rec-${q.id}"></div>
+    </div>
+  `;}).join('');
+  document.getElementById('prog-total').textContent = questions.length;
+  document.getElementById('mode-badge').textContent = `Полный аудит — ${questions.length} вопросов`;
+}
+
+function applyRestoredAnswersToUI(){
+  Object.keys(answers).forEach(qid=>{
+    const ans = answers[qid];
+    const card = document.getElementById('qcard-'+qid);
+    if(!card) return;
+    card.querySelectorAll('.ans-btn').forEach(b=>b.classList.toggle('active', b.dataset.ans===ans));
+    card.classList.add('answered');
+    const q = questions.find(x=>x.id===qid);
+    const rec = document.getElementById('rec-'+qid);
+    let recText = '';
+    if(ans==='no') recText = '<b>Рекомендация:</b> ' + q.recommendationNo;
+    else if(ans==='partial') recText = '<b>Рекомендация:</b> ' + q.recommendationPartial;
+    else if(ans==='unknown') recText = '<b>Рекомендация:</b> ' + q.recommendationUnknown;
+    if(recText){ rec.innerHTML = recText; rec.classList.add('show'); }
+  });
+  updateProgress();
+}
+
+function setAnswer(qid, ans){
+  markFirstInteraction();
+  answers[qid] = ans;
+  const card = document.getElementById('qcard-'+qid);
+  card.querySelectorAll('.ans-btn').forEach(b=>b.classList.toggle('active', b.dataset.ans===ans));
+  card.classList.add('answered');
+  card.classList.remove('unanswered-critical');
+  const q = questions.find(x=>x.id===qid);
+  const rec = document.getElementById('rec-'+qid);
+  let recText = '';
+  if(ans==='no') recText = '<b>Рекомендация:</b> ' + q.recommendationNo;
+  else if(ans==='partial') recText = '<b>Рекомендация:</b> ' + q.recommendationPartial;
+  else if(ans==='unknown') recText = '<b>Рекомендация:</b> ' + q.recommendationUnknown;
+  if(recText){ rec.innerHTML = recText; rec.classList.add('show'); }
+  else { rec.classList.remove('show'); rec.innerHTML = ''; }
+  updateProgress();
+  saveState();
+}
+
+function updateProgress(){
+  const total = questions.length;
+  const answered = Object.keys(answers).length;
+  const pct = Math.round(answered/total*100);
+  document.getElementById('prog-answered').textContent = answered;
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-fill').style.width = pct+'%';
+}
+
+function resetAll(){
+  for(const k in answers) delete answers[k];
+  document.querySelectorAll('.ans-btn.active').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.qcard').forEach(c=>{c.classList.remove('answered','unanswered-critical')});
+  document.querySelectorAll('.qcard-rec').forEach(r=>{r.classList.remove('show'); r.innerHTML='';});
+  document.getElementById('report').classList.remove('show');
+  document.getElementById('offer').classList.remove('show');
+  destroyCharts();
+  clearState();
+  updateProgress();
+  toast('Ответы и сохранённый прогресс сброшены');
+}
+
+/* ====================================================================
+   ГРАФИКА ОТЧЁТА (Chart.js)
+==================================================================== */
+let chartSections = null;
+let chartAnswers = null;
+
+function destroyCharts(){
+  if(chartSections){ chartSections.destroy(); chartSections = null; }
+  if(chartAnswers){ chartAnswers.destroy(); chartAnswers = null; }
+}
+
+function buildSectionStats(){
+  const map = {};
+  questions.forEach(q=>{
+    const a = answers[q.id];
+    if(!map[q.section]) map[q.section] = {earned:0, max:0, count:0, na:0};
+    if(a === 'na'){ map[q.section].na++; return; }
+    const w = ANS_WEIGHT[a];
+    if(w === null || w === undefined){
+      map[q.section].max += q.weight;
+      map[q.section].count++;
+      return;
+    }
+    map[q.section].earned += w * q.weight;
+    map[q.section].max += q.weight;
+    map[q.section].count++;
+  });
+  const labels = Object.keys(map);
+  const values = labels.map(s => map[s].max>0 ? Math.round(map[s].earned/map[s].max*100) : 0);
+  return {labels, values};
+}
+
+function colorForPercent(p){
+  if(p >= 71) return 'rgba(25,135,84,0.85)';
+  if(p >= 46) return 'rgba(232,178,48,0.85)';
+  if(p >= 21) return 'rgba(232,120,48,0.85)';
+  return 'rgba(220,53,69,0.85)';
+}
+
+function renderCharts(stats){
+  destroyCharts();
+
+  const ctx1 = document.getElementById('chart-sections').getContext('2d');
+  chartSections = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: stats.sections.labels,
+      datasets: [{
+        label: 'Готовность, %',
+        data: stats.sections.values,
+        backgroundColor: stats.sections.values.map(colorForPercent),
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
+      },
+      scales: {
+        x: { beginAtZero:true, max:100, ticks:{callback:v=>v+'%'} },
+        y: { ticks:{font:{size:10}, autoSkip:false} }
+      }
+    }
+  });
+
+  const ctx2 = document.getElementById('chart-answers').getContext('2d');
+  chartAnswers = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['Да','Частично','Нет','Не знаю','Не применимо'],
+      datasets: [{
+        data: [stats.counts.yes, stats.counts.partial, stats.counts.no, stats.counts.unknown, stats.counts.na],
+        backgroundColor: ['#198754','#e8b230','#dc3545','#9ca3af','#4b5563'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'bottom', labels:{font:{size:11}, padding:10} },
+        tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed } }
+      },
+      cutout: '55%'
+    }
+  });
+}
+
+/* ====================================================================
+   РАСЧЁТ РЕЗУЛЬТАТА
+==================================================================== */
+function calculateResults(){
+  let hasError = false;
+
+  const name = document.getElementById('lead-name').value.trim();
+  const phone = document.getElementById('lead-phone').value.trim();
+  const email = document.getElementById('lead-email').value.trim();
+  const role = document.getElementById('lead-role').value;
+  const consent = document.getElementById('lead-consent').checked;
+  const honeypot = document.getElementById('lead-website').value;
+
+  if(honeypot && honeypot.length > 0){
+    console.warn('[antispam] honeypot triggered');
+    toast('Ошибка валидации формы','error');
+    return;
+  }
+
+  if(firstInteractionTs && (Date.now() - firstInteractionTs) < 3000){
+    toast('Заполнение слишком быстрое — проверьте данные','error');
+    return;
+  }
+
+  const nameRes = validateName(name);
+  if(!nameRes.ok){ showFieldError('name', nameRes.reason); hasError = true; }
+  else clearFieldError('name');
+
+  const phoneRes = validatePhone(phone);
+  if(!phoneRes.ok){ showFieldError('phone', phoneRes.reason); hasError = true; }
+  else clearFieldError('phone');
+
+  const emailRes = validateEmail(email);
+  if(!emailRes.ok){ showFieldError('email', emailRes.reason); hasError = true; }
+  else clearFieldError('email');
+
+  if(!role){ toast('Выберите должность','error'); hasError = true; }
+
+  if(hasError){
+    toast('Проверьте корректность полей формы','error');
+    document.querySelector('.lead-card').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  if(!consent){ toast('Необходимо согласие на обработку ПДн','error'); return; }
+
+  if(Object.keys(answers).length < questions.length){
+    if(!confirm('Отвечено '+Object.keys(answers).length+' из '+questions.length+'. Рассчитать результат по неполным данным?')) return;
+  }
+
+  let earned=0, max=0, yes=0,no=0,partial=0,unknown=0,na=0;
+  let critFails=[], topIssues=[];
+  const tags = new Set();
+  const fullAnswers = [];
+  const productsSet = new Set();
+  let monitoring2027 = false;
+
+  questions.forEach(q=>{
+    const a = answers[q.id];
+    let recForRow = '';
+    if(!a){
+      no++;
+      if(q.critical) critFails.push(q);
+      topIssues.push({q, ans:'unknown', priority: q.critical?1:2});
+      recForRow = q.recommendationUnknown;
+    } else if(a==='na'){
+      na++;
+    } else {
+      const w = ANS_WEIGHT[a];
+      earned += w * q.weight;
+      max += q.weight;
+      if(a==='yes') yes++;
+      else if(a==='no'){
+        no++;
+        if(q.critical) critFails.push(q);
+        topIssues.push({q, ans:'no', priority:q.critical?1:2});
+        q.crmTag.forEach(t=>tags.add(t));
+        recForRow = q.recommendationNo;
+      } else if(a==='partial'){
+        partial++;
+        topIssues.push({q, ans:'partial', priority:q.critical?2:3});
+        q.crmTag.forEach(t=>tags.add(t));
+        recForRow = q.recommendationPartial;
+      } else if(a==='unknown'){
+        unknown++;
+        // unknown НЕ добавляет в critFails и в crmTag (по требованию промта)
+        topIssues.push({q, ans:'unknown', priority: q.critical?2:3});
+        recForRow = q.recommendationUnknown;
+      }
+    }
+
+    // Мониторинг 2027: если по перспективному блоку получен no/partial/unknown
+    const isFutureBlock = (q.horizon && q.horizon.includes('2027')) || (q.normStatus && q.normStatus.indexOf('Перспективн') === 0);
+    if(isFutureBlock && (a==='no' || a==='partial' || a==='unknown' || !a)){
+      monitoring2027 = true;
+      tags.add('MONITORING_2027_REQUIRED');
+    }
+
+    // Продукты
+    if(q.product && a !== 'yes' && a !== 'na' && q.product){
+      if(a==='no' || a==='partial' || a==='unknown' || !a){
+        productsSet.add(q.product);
+      }
+    }
+
+    fullAnswers.push({
+      id: q.id,
+      section: q.section,
+      emailLabel: q.emailLabel,
+      question: q.question,
+      answer: a || null,
+      answerLabel: a ? ANS_LABEL[a] : 'Без ответа',
+      weight: q.weight,
+      critical: q.critical,
+      normStatus: q.normStatus,
+      horizon: q.horizon,
+      responsible: q.responsible,
+      crmTag: q.crmTag,
+      recommendation: recForRow || null
+    });
+  });
+
+  const score = max>0 ? Math.round(earned/max*100) : 0;
+  const riskPercent = 100 - score;
+
+  let rpnLevel, rpnText, rpnClass;
+  if(score>=71){ rpnLevel='RPN_GREEN'; rpnText='🟢 Низкий риск — поддерживающий мониторинг'; rpnClass='rpn-green'; }
+  else if(score>=46){ rpnLevel='RPN_YELLOW'; rpnText='🟡 Средний риск — рекомендуем профессиональный аудит'; rpnClass='rpn-yellow'; }
+  else if(score>=21){ rpnLevel='RPN_RED'; rpnText='🟠 Высокий риск — рекомендуем расширенный аудит и сопровождение'; rpnClass='rpn-red'; }
+  else { rpnLevel='RPN_CRITICAL'; rpnText='🔴 Критический уровень — требуется срочный аудит'; rpnClass='rpn-critical'; }
+
+  // Корректировка по критическим провалам (по требованию промта)
+  if(critFails.length>=1 && rpnLevel==='RPN_GREEN'){
+    rpnLevel='RPN_YELLOW'; rpnText='🟡 Есть критические нарушения — снижено до Yellow'; rpnClass='rpn-yellow';
+  }
+  if(critFails.length>=2 && (rpnLevel==='RPN_GREEN' || rpnLevel==='RPN_YELLOW')){
+    rpnLevel='RPN_RED'; rpnText='🟠 ≥2 критических нарушений — снижено до Red'; rpnClass='rpn-red';
+  }
+  if(critFails.length>=3){
+    rpnLevel='RPN_CRITICAL'; rpnText='🔴 ≥3 критических нарушения — срочный аудит обязателен'; rpnClass='rpn-critical';
+    tags.add('URGENT_CASE');
+  }
+
+  // Базовые уровневые теги
+  tags.add(rpnLevel);
+
+  document.getElementById('r-score').textContent = score+'%';
+  document.getElementById('r-risk').textContent = riskPercent+'%';
+  document.getElementById('r-yes').textContent = yes;
+  document.getElementById('r-no').textContent = no;
+  document.getElementById('r-partial').textContent = partial;
+  document.getElementById('r-crit').textContent = critFails.length;
+
+  const banner = document.getElementById('rpn-banner');
+  banner.className = 'rpn-banner '+rpnClass;
+  banner.innerHTML = `<b>${rpnText}</b><br><small style="font-weight:400;opacity:0.85">Готовность: ${score}% · Риск: ${riskPercent}% · Критических нарушений: ${critFails.length}</small>`;
+
+  // ТОП-проблем — теперь slice(0,10)
+  topIssues.sort((a,b)=>a.priority-b.priority);
+  const topHtml = topIssues.slice(0,10).map(t=>{
+    const recMap = {no:t.q.recommendationNo, partial:t.q.recommendationPartial, unknown:t.q.recommendationUnknown};
+    return `<li class="${t.q.critical?'critical':''}"><b>${t.q.emailLabel}</b> (${ANS_LABEL[t.ans]||'нет ответа'}) · <i>${t.q.section}</i><br><span style="color:var(--gray-600)">${recMap[t.ans]||t.q.recommendationUnknown}</span></li>`;
+  }).join('') || '<li>Критических проблем не выявлено 🎉</li>';
+  document.getElementById('top-issues').innerHTML = topHtml;
+
+  // План 7 дней — критические провалы по приоритетным секциям
+  const PRIO_SECTIONS_7 = [
+    'Стерилизация медицинских изделий','Дезинфекция и предстерилизационная очистка',
+    'Отходы класса Б','Медицинские отходы','Производственный контроль',
+    'Медицинские книжки и медосмотры','Лицензия и виды деятельности',
+    'Профилактика рисков заражения и инфекционная среда',
+    'Водные линии, ИВУ и стоматологические установки','Рентген, КТ и радиология'
+  ];
+  const fail7 = critFails.filter(q=>PRIO_SECTIONS_7.indexOf(q.section)>=0).slice(0,7);
+  const restCrit = critFails.filter(q=>fail7.indexOf(q)<0).slice(0,7-fail7.length);
+  const items7 = [...fail7, ...restCrit].slice(0,7);
+  const plan7 = items7.length
+    ? items7.map(q=>`<li class="critical">⚡ <b>${q.emailLabel}</b> (${q.section}): ${q.recommendationNo}</li>`).join('')
+    : '<li>Срочных действий нет — сосредоточьтесь на плане 30 дней.</li>';
+  document.getElementById('plan-7').innerHTML = plan7;
+
+  // План 30 дней — оставшиеся проблемы
+  const used7 = new Set(items7.map(q=>q.id));
+  const plan30Items = topIssues
+    .filter(t => !used7.has(t.q.id))
+    .slice(0,8)
+    .map(t=>{
+      const recMap = {no:t.q.recommendationNo, partial:t.q.recommendationPartial, unknown:t.q.recommendationUnknown};
+      return `<li>📌 <b>${t.q.emailLabel}</b> (${t.q.section}): ${recMap[t.ans]||t.q.recommendationUnknown}</li>`;
+    }).join('') || '<li>Поддерживайте текущий уровень + мониторинг изменений 2027.</li>';
+  document.getElementById('plan-30').innerHTML = plan30Items;
+
+  // Offer и продуктовые теги
+  const offer = document.getElementById('offer');
+  const recText = document.getElementById('offer-recommend-text');
+  if(rpnLevel === 'RPN_GREEN'){
+    offer.classList.remove('show');
+    tags.add('NEEDS_CONSULTATION');
+  } else {
+    offer.classList.add('show');
+    if(rpnLevel === 'RPN_CRITICAL'){
+      recText.textContent = '🚨 СРОЧНО: критический уровень риска — рекомендуем расширенный аудит';
+      tags.add('NEEDS_PREMIUM'); tags.add('NEEDS_RPN_CORE');
+    } else if(rpnLevel === 'RPN_RED'){
+      recText.textContent = '⚠ Высокий риск — рекомендуем профессиональный аудит с сопровождением';
+      tags.add('NEEDS_PREMIUM'); tags.add('NEEDS_AUDIT');
+    } else {
+      recText.textContent = '📋 Средний риск — рекомендуем профессиональный аудит';
+      tags.add('NEEDS_AUDIT');
+    }
+  }
+
+  questions.forEach(q=>{
+    if(q.critical && !answers[q.id]){
+      document.getElementById('qcard-'+q.id).classList.add('unanswered-critical');
+    }
+  });
+
+  const report = document.getElementById('report');
+  report.classList.add('show');
+
+  const chartStats = {
+    sections: buildSectionStats(),
+    counts: { yes, no, partial, unknown, na }
+  };
+  requestAnimationFrame(()=> renderCharts(chartStats));
+
+  report.scrollIntoView({behavior:'smooth', block:'start'});
+
+  window._lastPayload = buildPayload({
+    score, riskPercent, rpnLevel, yes,no,partial,unknown,na,
+    critFails, topIssues, tags:[...tags], chartStats,
+    fullAnswers, plan7Items: items7,
+    plan30Items: topIssues.filter(t=>!used7.has(t.q.id)).slice(0,8),
+    productsRecommended: [...productsSet],
+    monitoring2027
+  });
+  saveState();
+  toast('Расчёт выполнен · Готовность '+score+'% · Риск '+riskPercent+'%','success');
+}
+
+function buildPayload(r){
+  return {
+    timestamp: new Date().toISOString(),
+    lead: {
+      name: document.getElementById('lead-name').value,
+      role: document.getElementById('lead-role').value,
+      clinic: document.getElementById('lead-clinic').value,
+      city: document.getElementById('lead-city').value,
+      phone: document.getElementById('lead-phone').value,
+      email: document.getElementById('lead-email').value
+    },
+    direction: "rpn",
+    questions_total: questions.length,
+    score_ready_percent: r.score,
+    risk_percent: r.riskPercent,
+    rpn_level: r.rpnLevel,
+    answers_summary: { yes:r.yes, no:r.no, partial:r.partial, unknown:r.unknown, na:r.na },
+    critical_fails: r.critFails.map(q=>({id:q.id, label:q.emailLabel, section:q.section})),
+    crm_tags: r.tags,
+    top_issues: r.topIssues.slice(0,10).map(t=>({id:t.q.id, label:t.q.emailLabel, section:t.q.section, ans:t.ans})),
+    plan_7: r.plan7Items.map(q=>({id:q.id, label:q.emailLabel, section:q.section, action:q.recommendationNo})),
+    plan_30: r.plan30Items.map(t=>{
+      const recMap = {no:t.q.recommendationNo, partial:t.q.recommendationPartial, unknown:t.q.recommendationUnknown};
+      return {id:t.q.id, label:t.q.emailLabel, section:t.q.section, action: recMap[t.ans]||t.q.recommendationUnknown};
+    }),
+    section_stats: r.chartStats ? r.chartStats.sections : null,
+    raw_answers: {...answers},
+    full_answers: r.fullAnswers,
+    products_recommended: r.productsRecommended,
+    monitoring_2027_required: r.monitoring2027,
+    antispam: {
+      time_to_complete_ms: firstInteractionTs ? (Date.now() - firstInteractionTs) : null,
+      honeypot_filled: false,
+      ua: navigator.userAgent.slice(0,200)
+    }
+  };
+}
+
+function sendByEmail(){
+  if(!window._lastPayload){ toast('Сначала рассчитайте результат','error'); return; }
+  console.log('[EmailJS payload]', window._lastPayload);
+  toast('Отправка... (заглушка — payload в консоли)','success');
+  setTimeout(()=>toast('✉ Отчёт отправлен на '+window._lastPayload.lead.email+' (демо)','success'), 1200);
+}
+
+function downloadPDF(){
+  toast('Откроется диалог печати — выберите «Сохранить как PDF»','success');
+  setTimeout(()=>window.print(), 600);
+}
+
+function goToOffer(){
+  console.log('[Offer payload]', window._lastPayload);
+  toast('Переход к заказу аудита (Tilda + ЮKassa, заглушка)','success');
+}
+
+function toast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type||'');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+/* ====================================================================
+   ИНИЦИАЛИЗАЦИЯ
+==================================================================== */
+renderQuestions();
+
+const restored = loadState();
+if(restored){
+  applyRestoredAnswersToUI();
+  toast('Восстановлен сохранённый прогресс','success');
+}
+updateProgress();
+
+['lead-name','lead-role','lead-clinic','lead-city','lead-phone','lead-email','lead-consent'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', ()=>{
+    markFirstInteraction();
+    saveStateDebounced();
+    if(id==='lead-name')  clearFieldError('name');
+    if(id==='lead-phone') clearFieldError('phone');
+    if(id==='lead-email') clearFieldError('email');
+  });
+  el.addEventListener('change', ()=>{ markFirstInteraction(); saveState(); });
+});
+
+const phoneEl = document.getElementById('lead-phone');
+phoneEl.addEventListener('blur', ()=>{
+  formatPhoneInput({target: phoneEl});
+  const r = validatePhone(phoneEl.value);
+  if(!r.ok && phoneEl.value) showFieldError('phone', r.reason);
+  else clearFieldError('phone');
+});
+
+const emailEl = document.getElementById('lead-email');
+emailEl.addEventListener('blur', ()=>{
+  const r = validateEmail(emailEl.value);
+  if(!r.ok && emailEl.value) showFieldError('email', r.reason);
+  else clearFieldError('email');
+});
+
+const nameEl = document.getElementById('lead-name');
+nameEl.addEventListener('blur', ()=>{
+  const r = validateName(nameEl.value);
+  if(!r.ok && nameEl.value) showFieldError('name', r.reason);
+  else clearFieldError('name');
+});
+</script>
+</body>
+</html>
