@@ -5,7 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Экспресс-проверка готовности клиники к проверке РПН — Прототип v0.4 (60 вопросов)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/<<IDS_0002>>/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  (function(){
+    if (typeof emailjs !== 'undefined') {
+      emailjs.init({ publicKey: "hBzGU7lf2VIqmlW9U" });
+      console.log('[EmailJS] SDK initialized');
+    } else {
+      console.error('[EmailJS] SDK not loaded — проверьте интернет/блокировщики');
+    }
+  })();
+</script>
 <script>
   emailjs.init({ publicKey: "hBzGU7lf2VIqmlW9U" });
 </script>
