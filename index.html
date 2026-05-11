@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Экспресс-проверка готовности клиники к проверке РПН — Прототип v0.4 (60 вопросов)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/<<IDS_0002>>/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init({ publicKey: "hBzGU7lf2VIqmlW9U" });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -118,30 +121,13 @@ body{font-family:var(--font);font-size:14px;line-height:1.55;color:var(--gray-80
 .chart-card h4{font-size:0.88rem;color:var(--primary-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .chart-canvas-wrap{position:relative;height:240px}
 .chart-canvas-wrap.tall{height:520px}
-@media (max-width:640px){ .charts-block{grid-template-columns:1fr} }
+<<IDS_0003>> (max-width:640px){ .charts-block{grid-template-columns:1fr} }
 
 .report-section{margin:18px 0}
 .report-section h3{font-size:0.95rem;color:var(--primary-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .report-list{list-style:none;padding:0}
 .report-list li{padding:10px 12px;background:var(--gray-50);border-left:3px solid var(--accent);border-radius:4px;margin-bottom:8px;font-size:0.86rem;line-height:1.5}
 .report-list li.critical{border-left-color:var(--danger);background:#fff7f7}
-
-.offer{display:none;margin:22px 0;background:linear-gradient(135deg,#0f4a35,#1a6b4e);border-radius:var(--radius-lg);padding:26px;color:#fff;position:relative;overflow:hidden}
-.offer.show{display:block}
-.offer::before{content:"";position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(212,148,10,0.15);border-radius:50%}
-.offer-badge{display:inline-block;background:var(--accent);color:#fff;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;margin-bottom:12px;position:relative;z-index:1}
-.offer h3{font-size:1.3rem;margin-bottom:8px;position:relative;z-index:1}
-.offer-sub{font-size:0.92rem;opacity:0.92;margin-bottom:16px;line-height:1.5;position:relative;z-index:1}
-.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:16px 0;position:relative;z-index:1}
-.offer-feat{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.85rem;line-height:1.45;display:flex;gap:10px;align-items:flex-start}
-.offer-feat i{color:var(--accent);font-size:1rem;margin-top:2px;flex-shrink:0}
-.offer-price{display:flex;align-items:baseline;gap:12px;margin:18px 0 14px;position:relative;z-index:1;flex-wrap:wrap}
-.offer-price-val{font-size:2rem;font-weight:800;color:var(--accent);line-height:1}
-.offer-price-lbl{font-size:0.8rem;opacity:0.88}
-.offer-cta{background:var(--accent);color:#fff;padding:14px 28px;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;width:100%;font-family:var(--font);transition:all 0.2s;position:relative;z-index:1}
-.offer-cta:hover{background:#b8800a;transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.offer-note{margin-top:12px;font-size:0.76rem;opacity:0.78;text-align:center;font-style:italic;position:relative;z-index:1}
-.offer-recommend{background:var(--accent);color:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;position:relative;z-index:1}
 
 .email-block{margin:22px 0;background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-md);padding:18px}
 .email-block h3{font-size:1rem;color:var(--primary-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -156,17 +142,17 @@ body{font-family:var(--font);font-size:14px;line-height:1.55;color:var(--gray-80
 .toast.success{background:var(--success)}
 .toast.error{background:var(--danger)}
 
-@media(max-width:640px){
+<<IDS_0003>>(max-width:640px){
 .page-wrap{margin:0;border-radius:0}
 .hero,.lead-card,.q-section,.actions,.report,.footer,.progress-wrap{padding-left:18px;padding-right:18px}
 .hero h1{font-size:1.2rem}
 .qcard-answers{flex-direction:column}
 .ans-btn{width:100%;text-align:center}
 }
-@media print{
+<<IDS_0003>> print{
 body{background:#fff}
 .page-wrap{box-shadow:none;margin:0;max-width:100%}
-.actions,.progress-wrap,.email-block,.offer-cta,.toast,.qcard-answers{display:none!important}
+.actions,.progress-wrap,.email-block,.toast,.qcard-answers{display:none!important}
 .report{display:block!important;page-break-before:always}
 .qcard{break-inside:avoid;page-break-inside:avoid}
 .chart-card{break-inside:avoid;page-break-inside:avoid}
@@ -186,9 +172,9 @@ body{background:#fff}
       </div>
     </div>
     <div class="hero-meta">
-      <span class="hero-tag"><i class="fas fa-gavel"></i> СанПиН 2.1.3678-21</span>
+      <span class="hero-tag"><i class="fas fa-gavel"></i> СанПиН <<IDS_0004>>-21</span>
       <span class="hero-tag"><i class="fas fa-virus-slash"></i> СанПиН 3.3686-21</span>
-      <span class="hero-tag"><i class="fas fa-radiation"></i> СанПиН 2.6.1.3288-25</span>
+      <span class="hero-tag"><i class="fas fa-radiation"></i> СанПиН 2.<<IDS_0005>>-25</span>
       <span class="hero-tag"><i class="fas fa-calendar-alt"></i> Горизонт 2026 + анонс 2027</span>
     </div>
     <div class="hero-disclaimer">
@@ -215,7 +201,7 @@ body{background:#fff}
       <input type="text" id="lead-clinic" placeholder="Название клиники" maxlength="200">
       <input type="text" id="lead-city" placeholder="Город" maxlength="80">
       <div>
-        <input type="tel" id="lead-phone" placeholder="Телефон * (например, +7 999 123-45-67)" required autocomplete="tel" maxlength="20">
+        <input type="tel" id="lead-phone" placeholder="Телефон * (например, <<IDS_0006>>)" required autocomplete="tel" maxlength="20">
         <div class="field-error" id="err-phone">Введите корректный телефон (10–15 цифр)</div>
       </div>
       <div>
@@ -288,29 +274,6 @@ body{background:#fff}
       <ul class="report-list" id="plan-30"><li>—</li></ul>
     </div>
 
-    <div class="offer" id="offer">
-      <span class="offer-badge">⚡ СЛЕДУЮЩИЙ ЭТАП</span>
-      <div class="offer-recommend" id="offer-recommend"><i class="fas fa-user-md"></i> <span id="offer-recommend-text">Рекомендуем профессиональный аудит</span></div>
-      <h3>Профессиональный аудит клиники с выездом эксперта</h3>
-      <div class="offer-sub">
-        Самотест выявил риски — следующий шаг: полный экспертный аудит на месте с проверкой документов, журналов, помещений, персонала и подготовкой к проверке Роспотребнадзора.
-      </div>
-      <div class="offer-grid">
-        <div class="offer-feat"><i class="fas fa-check-circle"></i><div><b>Выезд эксперта</b> в клинику с проверкой по 120+ пунктам</div></div>
-        <div class="offer-feat"><i class="fas fa-file-alt"></i><div><b>Аудит всех журналов</b> и медицинской документации</div></div>
-        <div class="offer-feat"><i class="fas fa-search"></i><div><b>Имитация проверки РПН</b> с фиксацией нарушений</div></div>
-        <div class="offer-feat"><i class="fas fa-tools"></i><div><b>План устранения</b> с приоритетами и сроками</div></div>
-        <div class="offer-feat"><i class="fas fa-folder-open"></i><div><b>Шаблоны документов</b>: журналы, приказы, регламенты</div></div>
-        <div class="offer-feat"><i class="fas fa-headset"></i><div><b>30 дней консультаций</b> по итогам аудита</div></div>
-      </div>
-      <div class="offer-price">
-        <span class="offer-price-val">14 900 – 19 900 ₽</span>
-        <span class="offer-price-lbl">в зависимости от объёма</span>
-      </div>
-      <button class="offer-cta" onclick="goToOffer()"><i class="fas fa-arrow-right"></i> Заказать аудит клиники</button>
-      <div class="offer-note">Оплата через Tilda + ЮKassa · Менеджер свяжется в течение 1 рабочего дня для уточнения объёма</div>
-    </div>
-
     <div class="email-block">
       <h3><i class="fas fa-envelope"></i> Получить результаты на e-mail</h3>
       <p>Отправим краткий отчёт с вашим Score, RPN-уровнем и приоритетным планом действий на указанный e-mail. Также можно скачать PDF.</p>
@@ -335,7 +298,6 @@ body{background:#fff}
    ДАННЫЕ — 60 ВОПРОСОВ ПОЛНОГО САНИТАРНО-ЭПИДЕМИОЛОГИЧЕСКОГО АУДИТА
 ==================================================================== */
 
-// Универсальные шаблоны рекомендаций (используются как fallback / общая логика)
 const REC_NO_TEMPLATE = "Разработайте регламент, утвердите приказом и назначьте ответственного. Систематизируйте документы и журналы, синхронизируйте с фактической работой клиники.";
 const REC_PARTIAL_TEMPLATE = "Закройте недостающие элементы регламента: документы, форматы, периодичность учёта, контроль исполнения и подтверждающие записи.";
 const REC_UNKNOWN_TEMPLATE = "В кабинете обратитесь к ответственному, проведите экспресс-аудит блока документации по внутреннему чек-листу. Если ситуация не ясна — включите этот блок в выезд эксперта на аудит.";
@@ -346,19 +308,19 @@ const FUTURE_2027_REFORM = "Контролируется как направле
 const questions = [
   // ============ Общие сведения об организации ============
   { id:"RPN-001", direction:"rpn", section:"Общие сведения об организации",
-    question:"Актуальны ли уставные документы клиники: регистрационные коды юр. лица, ОГРН, выписка из ЕГРЮЛ, договор аренды/собственности, штатное расписание и схема структуры?",
+    question:"Актуальны ли уставные документы клиники: регистрационные коды юр. лица, <<ORG_0002>>, выписка из <<ORG_0003>>, договор аренды/собственности, штатное расписание и схема структуры?",
     explanation:"Это базовая папка, которую запрашивают первой при любой проверке. Без актуальных документов невозможно подтвердить правовой статус организации.",
-    check:"Проверьте: устав, ОГРН, ИНН/КПП, ЕГРЮЛ, договор аренды или СОС, штатное расписание, приказ о назначении руководителя.",
+    check:"Проверьте: устав, <<ORG_0002>>, <<ORG_0004>>/<<ORG_0005>>, <<ORG_0003>>, договор аренды или <<ORG_0006>>, штатное расписание, приказ о назначении руководителя.",
     answers:["Да","Нет","Частично","Не знаю","Не применимо"],
     weight:2, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"ГК РФ, ФЗ №129-ФЗ, СанПиН 2.1.3678-21",
+    source:"<<ORG_0007>>, ФЗ №129-ФЗ, СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Руководитель / Юрист клиники",
     crmTag:["RPN_GENERAL_RISK"],
     recommendationNo:"Соберите базовый комплект уставных документов в одну папку: устав, ЕГРЮЛ, штатное, приказ о руководителе, договор аренды. Назначьте ответственного хранителя.",
-    recommendationPartial:"Найдите недостающие документы: чаще всего нет актуального ЕГРЮЛ, договора аренды или штатного расписания на текущий год.",
+    recommendationPartial:"Найдите недостающие документы: чаще всего нет актуального <<ORG_0003>>, договора аренды или штатного расписания на текущий год.",
     recommendationUnknown:"Запросите у бухгалтера и юриста полный комплект уставных документов и проведите ревизию.",
     product:"Core-пакет журналов",
     demo:false,
@@ -372,7 +334,7 @@ const questions = [
     weight:3, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.1.3678-21, СанПиН 3.3686-21",
+    source:"СанПиН <<IDS_0004>>-21, СанПиН 3.3686-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Главный врач / Управляющий",
     crmTag:["RPN_PREMISES_RISK"],
@@ -386,7 +348,7 @@ const questions = [
 
   // ============ Уведомительный режим и проверки ============
   { id:"RPN-003", direction:"rpn", section:"Уведомительный режим и проверки",
-    question:"Подано ли уведомление в Роспотребнадзор о начале медицинской деятельности, есть ли отметка или входящий номер обращения?",
+    question:"Подано ли уведомление в <<ORG_0008>> о начале медицинской деятельности, есть ли отметка или входящий номер обращения?",
     explanation:"Без уведомления деятельность считается несогласованной — это типовое основание для предписания.",
     check:"Проверьте: копию уведомления, отметку РПН, входящий номер, дату подачи.",
     answers:["Да","Нет","Частично","Не знаю","Не применимо"],
@@ -428,12 +390,12 @@ const questions = [
   { id:"RPN-005", direction:"rpn", section:"Производственный контроль",
     question:"Есть ли утверждённая программа производственного контроля (ППК) с графиком, по которому реально проводятся лабораторные пробы воздуха, поверхностей оборудования, рук персонала и стерильных материалов?",
     explanation:"ППК — основной документ при проверке РПН. Без него штраф до 200 тыс. руб., деятельность может быть приостановлена.",
-    check:"Проверьте: утверждённую ППК, договор с аккредитованной лабораторией, протоколы за год, график выполнения.",
+    check:"Проверьте: утверждённую <<ORG_0009>>, договор с аккредитованной лабораторией, протоколы за год, график выполнения.",
     answers:["Да","Нет","Частично","Не знаю","Не применимо"],
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СП 1.1.1058-01, СанПиН 2.1.3678-21",
+    source:"СП <<IDS_0007>>-01, СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Главный врач / Ответственный за санэпидрежим",
     crmTag:["RPN_PPK_RISK"],
@@ -452,7 +414,7 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СП 1.1.1058-01",
+    source:"СП <<IDS_0007>>-01",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Ответственный за санэпидрежим",
     crmTag:["RPN_PPK_RISK"],
@@ -492,7 +454,7 @@ const questions = [
     weight:4, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.1.3678-21, ФЗ №323-ФЗ",
+    source:"СанПиН <<IDS_0004>>-21, ФЗ №323-ФЗ",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Главный врач / Управляющий",
     crmTag:["RPN_PREMISES_RISK"],
@@ -652,8 +614,8 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.1.3678-21",
-    future2027:"С 2027 г. ожидается переход на электронный учёт через ФГИС ОПВК и реестровых операторов.",
+    source:"СанПиН <<IDS_0004>>-21",
+    future2027:"С 2027 г. ожидается переход на электронный учёт через <<ORG_0010>> ОПВК и реестровых операторов.",
     responsible:"Ответственный за обращение с отходами",
     crmTag:["RPN_WASTE_B_RISK"],
     recommendationNo:"Разработайте и утвердите схему обращения с медицинскими отходами с маркировкой и графиком.",
@@ -671,7 +633,7 @@ const questions = [
     weight:4, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.1.3678-21",
+    source:"СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Ответственный за обращение с отходами",
     crmTag:["RPN_WASTE_B_RISK","RPN_PERSONNEL_TRAINING_RISK"],
@@ -692,7 +654,7 @@ const questions = [
     weight:4, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 1.2.3685-21, СанПиН 2.1.3678-21",
+    source:"СанПиН <<IDS_0008>>-21, СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Управляющий / Инженер",
     crmTag:["RPN_ENGINEERING_RISK","RPN_VENTILATION_RISK"],
@@ -766,17 +728,17 @@ const questions = [
   // ============ Отходы класса Б ============
   { id:"RPN-022", direction:"rpn", section:"Отходы класса Б",
     question:"Заключён ли договор класса Б с лицензией, с лицензированной фирмой по вывозу, и сохраняется журнал движения с актами вывоза?",
-    explanation:"С 2027 г. договор должен быть только с оператором из федерального реестра + электронный учёт ФГИС.",
+    explanation:"С 2027 г. договор должен быть только с оператором из федерального реестра + электронный учёт <<ORG_0010>>.",
     check:"Проверьте: договор, лицензию контрагента, акты вывоза за 3 месяца, журнал движения отходов.",
     answers:["Да","Нет","Частично","Не знаю","Не применимо"],
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026–2027",
-    source:"СанПиН 2.1.3678-21 (изм. 2027)",
-    future2027:"С 2027 г. — обязательная регистрация контрагентов в реестре ФГИС ОПВК и электронный учёт.",
+    source:"СанПиН <<IDS_0004>>-21 (изм. 2027)",
+    future2027:"С 2027 г. — обязательная регистрация контрагентов в реестре <<ORG_0010>> ОПВК и электронный учёт.",
     responsible:"Ответственный за обращение с отходами",
     crmTag:["RPN_WASTE_B_RISK"],
-    recommendationNo:"Срочно заключите договор с оператором из федерального реестра и подключитесь к ФГИС ОПВК.",
+    recommendationNo:"Срочно заключите договор с оператором из федерального реестра и подключитесь к <<ORG_0010>> ОПВК.",
     recommendationPartial:"Уточните, внесён ли ваш оператор в реестр и оформляются ли акты вывоза по новой форме.",
     recommendationUnknown:"Запросите у администратора копии договора и актов вывоза за 3 месяца.",
     product:"Пакет работы с отходами Б",
@@ -791,7 +753,7 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.1.3678-21",
+    source:"СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Ответственный за обращение с отходами",
     crmTag:["RPN_WASTE_B_RISK"],
@@ -810,13 +772,13 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Перспективный блок 2027",
     horizon:"2026–2027",
-    source:"Постановление Правительства РФ + СанПиН 2.1.3678-21",
+    source:"Постановление <<ORG_0011>> + СанПиН <<IDS_0004>>-21",
     future2027:"С 2027 г. — переход на электронный учёт через ФГИС ОПВК и реестровых операторов.",
     responsible:"Ответственный за обращение с отходами",
     crmTag:["RPN_WASTE_B_RISK","MONITORING_2027_REQUIRED"],
-    recommendationNo:"До 2027 г. подключитесь к ФГИС ОПВК и назначьте ответственного с ЭЦП.",
-    recommendationPartial:"Проверьте полноту записей — в ФГИС должны быть все партии за период.",
-    recommendationUnknown:"Срочно уточните у ответственного статус подключения к ФГИС.",
+    recommendationNo:"До 2027 г. подключитесь к <<ORG_0010>> ОПВК и назначьте ответственного с ЭЦП.",
+    recommendationPartial:"Проверьте полноту записей — в <<ORG_0010>> должны быть все партии за период.",
+    recommendationUnknown:"Срочно уточните у ответственного статус подключения к <<ORG_0010>>.",
     product:"Пакет работы с отходами Б",
     demo:true,
     emailLabel:"Электронный учёт отходов (ФГИС)"
@@ -911,7 +873,7 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"Приказ Минздрава 29н, СП 2.1.3678-20",
+    source:"Приказ Минздрава 29н, СП <<IDS_0004>>-20",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"HR / Главный врач",
     crmTag:["RPN_MEDBOOKS_RISK","RPN_PERSONNEL_TRAINING_RISK"],
@@ -1071,7 +1033,7 @@ const questions = [
     weight:4, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.1.3678-21",
+    source:"СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Управляющий / Юрист клиники",
     crmTag:["RPN_CONTRACTORS_RISK","RPN_DOCUMENTS_RISK"],
@@ -1271,7 +1233,7 @@ const questions = [
     weight:4, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 1.2.3685-21, СанПиН 2.1.3678-21",
+    source:"СанПиН <<IDS_0008>>-21, СанПиН <<IDS_0004>>-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Инженер",
     crmTag:["RPN_PREMISES_RISK","RPN_VENTILATION_RISK"],
@@ -1311,7 +1273,7 @@ const questions = [
     weight:4, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"Р 3.5.1904-04, СанПиН 3.3686-21",
+    source:"Р <<IDS_0009>>-04, СанПиН 3.3686-21",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Инженер / Старшая медсестра",
     crmTag:["RPN_BACTERICIDAL_LAMPS_RISK"],
@@ -1330,7 +1292,7 @@ const questions = [
     weight:4, critical:false,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"Р 3.5.1904-04",
+    source:"Р <<IDS_0009>>-04",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Инженер",
     crmTag:["RPN_BACTERICIDAL_LAMPS_RISK"],
@@ -1471,7 +1433,7 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.6.1.3288-25, ФЗ №3-ФЗ «О радиационной безопасности»",
+    source:"СанПиН 2.<<IDS_0005>>-25, ФЗ №3-ФЗ «О радиационной безопасности»",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Инженер / Главный врач",
     crmTag:["RPN_XRAY_SANITARY_RISK"],
@@ -1490,7 +1452,7 @@ const questions = [
     weight:5, critical:true,
     normStatus:"Действующее требование",
     horizon:"2026",
-    source:"СанПиН 2.6.1.3288-25",
+    source:"СанПиН 2.<<IDS_0005>>-25",
     future2027:FUTURE_2027_DEFAULT,
     responsible:"Инженер",
     crmTag:["RPN_XRAY_SANITARY_RISK"],
@@ -1511,7 +1473,7 @@ const questions = [
     weight:2, critical:false,
     normStatus:"Перспективный блок 2027",
     horizon:"Концепция 2027",
-    source:"Концепция санитарного законодательства РФ",
+    source:"Концепция санитарного законодательства <<LOC_0001>>",
     future2027:FUTURE_2027_REFORM,
     responsible:"Главный врач / Юрист клиники",
     crmTag:["RPN_2027_MONITORING","MONITORING_2027_REQUIRED"],
@@ -1530,7 +1492,7 @@ const questions = [
     weight:2, critical:false,
     normStatus:"Перспективный блок 2027",
     horizon:"Концепция 2027",
-    source:"Концепция санитарного законодательства РФ",
+    source:"Концепция санитарного законодательства <<LOC_0001>>",
     future2027:FUTURE_2027_REFORM,
     responsible:"Главный врач / Ответственный за санэпидрежим",
     crmTag:["RPN_2027_MONITORING","MONITORING_2027_REQUIRED"],
@@ -1546,6 +1508,15 @@ const questions = [
 const answers = {};
 const ANS_WEIGHT = { yes:1.0, partial:0.5, no:0, unknown:0.2, na:null };
 const ANS_LABEL  = { yes:"Да", no:"Нет", partial:"Частично", unknown:"Не знаю", na:"Не применимо" };
+
+/* ====================================================================
+   КОНФИГУРАЦИЯ EmailJS
+==================================================================== */
+const EMAILJS_CONFIG = {
+  serviceId:     "service_md",
+  templateId:    "template_rospotrebnadzor",
+  internalEmail: "<<IDS_0001>>"
+};
 
 /* ====================================================================
    localStorage (автосохранение прогресса)
@@ -1795,7 +1766,6 @@ function resetAll(){
   document.querySelectorAll('.qcard').forEach(c=>{c.classList.remove('answered','unanswered-critical')});
   document.querySelectorAll('.qcard-rec').forEach(r=>{r.classList.remove('show'); r.innerHTML='';});
   document.getElementById('report').classList.remove('show');
-  document.getElementById('offer').classList.remove('show');
   destroyCharts();
   clearState();
   updateProgress();
@@ -1981,20 +1951,17 @@ function calculateResults(){
         recForRow = q.recommendationPartial;
       } else if(a==='unknown'){
         unknown++;
-        // unknown НЕ добавляет в critFails и в crmTag (по требованию промта)
         topIssues.push({q, ans:'unknown', priority: q.critical?2:3});
         recForRow = q.recommendationUnknown;
       }
     }
 
-    // Мониторинг 2027: если по перспективному блоку получен no/partial/unknown
     const isFutureBlock = (q.horizon && q.horizon.includes('2027')) || (q.normStatus && q.normStatus.indexOf('Перспективн') === 0);
     if(isFutureBlock && (a==='no' || a==='partial' || a==='unknown' || !a)){
       monitoring2027 = true;
       tags.add('MONITORING_2027_REQUIRED');
     }
 
-    // Продукты
     if(q.product && a !== 'yes' && a !== 'na' && q.product){
       if(a==='no' || a==='partial' || a==='unknown' || !a){
         productsSet.add(q.product);
@@ -2027,7 +1994,6 @@ function calculateResults(){
   else if(score>=21){ rpnLevel='RPN_RED'; rpnText='🟠 Высокий риск — рекомендуем расширенный аудит и сопровождение'; rpnClass='rpn-red'; }
   else { rpnLevel='RPN_CRITICAL'; rpnText='🔴 Критический уровень — требуется срочный аудит'; rpnClass='rpn-critical'; }
 
-  // Корректировка по критическим провалам (по требованию промта)
   if(critFails.length>=1 && rpnLevel==='RPN_GREEN'){
     rpnLevel='RPN_YELLOW'; rpnText='🟡 Есть критические нарушения — снижено до Yellow'; rpnClass='rpn-yellow';
   }
@@ -2039,7 +2005,6 @@ function calculateResults(){
     tags.add('URGENT_CASE');
   }
 
-  // Базовые уровневые теги
   tags.add(rpnLevel);
 
   document.getElementById('r-score').textContent = score+'%';
@@ -2053,7 +2018,6 @@ function calculateResults(){
   banner.className = 'rpn-banner '+rpnClass;
   banner.innerHTML = `<b>${rpnText}</b><br><small style="font-weight:400;opacity:0.85">Готовность: ${score}% · Риск: ${riskPercent}% · Критических нарушений: ${critFails.length}</small>`;
 
-  // ТОП-проблем — теперь slice(0,10)
   topIssues.sort((a,b)=>a.priority-b.priority);
   const topHtml = topIssues.slice(0,10).map(t=>{
     const recMap = {no:t.q.recommendationNo, partial:t.q.recommendationPartial, unknown:t.q.recommendationUnknown};
@@ -2061,7 +2025,6 @@ function calculateResults(){
   }).join('') || '<li>Критических проблем не выявлено 🎉</li>';
   document.getElementById('top-issues').innerHTML = topHtml;
 
-  // План 7 дней — критические провалы по приоритетным секциям
   const PRIO_SECTIONS_7 = [
     'Стерилизация медицинских изделий','Дезинфекция и предстерилизационная очистка',
     'Отходы класса Б','Медицинские отходы','Производственный контроль',
@@ -2077,7 +2040,6 @@ function calculateResults(){
     : '<li>Срочных действий нет — сосредоточьтесь на плане 30 дней.</li>';
   document.getElementById('plan-7').innerHTML = plan7;
 
-  // План 30 дней — оставшиеся проблемы
   const used7 = new Set(items7.map(q=>q.id));
   const plan30Items = topIssues
     .filter(t => !used7.has(t.q.id))
@@ -2088,24 +2050,15 @@ function calculateResults(){
     }).join('') || '<li>Поддерживайте текущий уровень + мониторинг изменений 2027.</li>';
   document.getElementById('plan-30').innerHTML = plan30Items;
 
-  // Offer и продуктовые теги
-  const offer = document.getElementById('offer');
-  const recText = document.getElementById('offer-recommend-text');
+  // CRM-теги по уровню риска
   if(rpnLevel === 'RPN_GREEN'){
-    offer.classList.remove('show');
     tags.add('NEEDS_CONSULTATION');
+  } else if(rpnLevel === 'RPN_CRITICAL'){
+    tags.add('NEEDS_PREMIUM'); tags.add('NEEDS_RPN_CORE');
+  } else if(rpnLevel === 'RPN_RED'){
+    tags.add('NEEDS_PREMIUM'); tags.add('NEEDS_AUDIT');
   } else {
-    offer.classList.add('show');
-    if(rpnLevel === 'RPN_CRITICAL'){
-      recText.textContent = '🚨 СРОЧНО: критический уровень риска — рекомендуем расширенный аудит';
-      tags.add('NEEDS_PREMIUM'); tags.add('NEEDS_RPN_CORE');
-    } else if(rpnLevel === 'RPN_RED'){
-      recText.textContent = '⚠ Высокий риск — рекомендуем профессиональный аудит с сопровождением';
-      tags.add('NEEDS_PREMIUM'); tags.add('NEEDS_AUDIT');
-    } else {
-      recText.textContent = '📋 Средний риск — рекомендуем профессиональный аудит';
-      tags.add('NEEDS_AUDIT');
-    }
+    tags.add('NEEDS_AUDIT');
   }
 
   questions.forEach(q=>{
@@ -2175,21 +2128,100 @@ function buildPayload(r){
   };
 }
 
-function sendByEmail(){
-  if(!window._lastPayload){ toast('Сначала рассчитайте результат','error'); return; }
-  console.log('[EmailJS payload]', window._lastPayload);
-  toast('Отправка... (заглушка — payload в консоли)','success');
-  setTimeout(()=>toast('✉ Отчёт отправлен на '+window._lastPayload.lead.email+' (демо)','success'), 1200);
+/* ====================================================================
+   ОТПРАВКА ОТЧЁТА ЧЕРЕЗ EmailJS
+==================================================================== */
+function _listHtml(items, kind){
+  if(!items || !items.length){
+    return '<p style="color:#6b7280;font-style:italic;margin:6px 0">Нет данных</p>';
+  }
+  return '<ul style="padding-left:18px;margin:8px 0">' + items.map(it=>{
+    if(kind === 'top'){
+      return `<li style="margin-bottom:6px"><b>${it.label}</b> (${ANS_LABEL[it.ans] || 'нет ответа'}) — <i>${it.section}</i></li>`;
+    }
+    return `<li style="margin-bottom:6px"><b>${it.label}</b> (${it.section}): ${it.action}</li>`;
+  }).join('') + '</ul>';
+}
+
+function _buildEmailParams(payload, toEmail, copyType){
+  const p = payload;
+  const rpnTextMap = {
+    RPN_GREEN:    'Низкий риск',
+    RPN_YELLOW:   'Средний риск',
+    RPN_RED:      'Высокий риск',
+    RPN_CRITICAL: 'Критический уровень'
+  };
+  return {
+    to_email:        toEmail,
+    copy_type:       copyType,
+    lead_name:       p.lead.name   || '—',
+    lead_role:       p.lead.role   || '—',
+    clinic:          p.lead.clinic || '—',
+    city:            p.lead.city   || '—',
+    phone:           p.lead.phone  || '—',
+    email:           p.lead.email  || '—',
+    score:           p.score_ready_percent,
+    risk:            p.risk_percent,
+    rpn_level:       p.rpn_level,
+    rpn_text:        rpnTextMap[p.rpn_level] || '',
+    crit_count:      p.critical_fails.length,
+    yes:             p.answers_summary.yes,
+    no:              p.answers_summary.no,
+    partial:         p.answers_summary.partial,
+    unknown:         p.answers_summary.unknown,
+    na:              p.answers_summary.na,
+    top_issues_html: _listHtml(p.top_issues, 'top'),
+    plan_7_html:     _listHtml(p.plan_7,  'plan'),
+    plan_30_html:    _listHtml(p.plan_30, 'plan'),
+    products:        (p.products_recommended && p.products_recommended.length)
+                       ? p.products_recommended.join(', ')
+                       : 'Не требуются',
+    crm_tags:        (p.crm_tags || []).join(', '),
+    timestamp:       new Date(p.timestamp).toLocaleString('ru-RU')
+  };
+}
+
+async function sendByEmail(){
+  if(!window._lastPayload){
+    toast('Сначала рассчитайте результат','error');
+    return;
+  }
+  if(typeof emailjs === 'undefined'){
+    toast('EmailJS SDK не загружен','error');
+    return;
+  }
+
+  const payload = window._lastPayload;
+  const clientEmail = (payload.lead.email || '').trim();
+
+  if(!clientEmail){
+    toast('Не указан e-mail заказчика','error');
+    return;
+  }
+
+  toast('Отправка отчёта...','success');
+
+  try {
+    // 1) Письмо заказчику
+    const clientParams = _buildEmailParams(payload, clientEmail, 'Копия для заказчика');
+    await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, clientParams);
+
+    // 2) Внутренняя копия (лид)
+    const internalParams = _buildEmailParams(payload, EMAILJS_CONFIG.internalEmail, 'Внутренняя копия — лид с сайта');
+    await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, internalParams);
+
+    toast('✉ Отчёт отправлен на ' + clientEmail,'success');
+    console.log('[EmailJS] sent OK', payload);
+  } catch(err){
+    console.error('[EmailJS] send error:', err);
+    const msg = (err && (err.text || err.message)) || 'Неизвестная ошибка';
+    toast('Ошибка отправки: ' + msg,'error');
+  }
 }
 
 function downloadPDF(){
   toast('Откроется диалог печати — выберите «Сохранить как PDF»','success');
   setTimeout(()=>window.print(), 600);
-}
-
-function goToOffer(){
-  console.log('[Offer payload]', window._lastPayload);
-  toast('Переход к заказу аудита (Tilda + ЮKassa, заглушка)','success');
 }
 
 function toast(msg, type){
